@@ -28,7 +28,7 @@ const HomeHooks = () => {
       description: 'Maneja estado complejo mediante una función reductora.',
       category: 'Estado',
       route: '/playground/usereducer',
-      implemented: false
+      implemented: true
     }
   ];
 
