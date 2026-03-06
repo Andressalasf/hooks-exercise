@@ -113,6 +113,32 @@ Dos contextos en un mismo archivo que permiten cambiar el tema (claro/oscuro) y 
 
 ---
 
+## Ejercicio 4: useReducer
+
+### Descripción del Hook
+useReducer es una alternativa a useState para manejar estado más complejo. Recibe una función reductora y un estado inicial. La función reductora recibe el estado actual y una acción, y devuelve el nuevo estado. La sintaxis básica es:
+
+```javascript
+const [state, dispatch] = useReducer(reducer, initialState);
+```
+
+### Ejercicio Desarrollado: Carrito de Compras
+
+Un carrito sencillo con una lista fija de productos donde se pueden agregar y quitar ítems, mostrando el total actualizado.
+
+#### Estado del Reducer:
+
+1. **items** (array): Lista de productos agregados al carrito.
+2. **total** (number): Suma del precio de los ítems en el carrito.
+
+#### Acciones Implementadas:
+
+- **ADD_ITEM**: Agrega el producto al carrito.
+- **REMOVE_ITEM**: Quita el producto del carrito y descuenta su precio del total.
+- **CLEAR_CART**: Vacía el carrito y reinicia el total.
+
+---
+
 ## Estructura del Proyecto
 
 ```
@@ -122,7 +148,7 @@ src/
     ├── UseStateExample.jsx     # Ejercicio de useState
     ├── UseEffectExample.jsx    # Ejercicio de useEffect
     ├── UseContextExample.jsx   # Ejercicio de useContext
-    └── UseReducerExample.jsx   # Ejercicio de useReducer (pendiente)
+    └── UseReducerExample.jsx   # Ejercicio de useReducer
 ```
 
 ---
@@ -132,7 +158,8 @@ src/
 - **Home**: `/playground` - Muestra la tabla con todos los hooks disponibles
 - **useState**: `/playground/usestate` - Contador interactivo
 - **useEffect**: `/playground/useeffect` - Temporizador con cambio de color
-- **useContext**: `/playground/usecontext` - Cambio de tema claro/oscuro
+- **useContext**: `/playground/usecontext` - Cambio de tema e idioma
+- **useReducer**: `/playground/usereducer` - Carrito de compras
 
 ---
 
