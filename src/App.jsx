@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import HomeHooks from './playground/HomeHooks';
 import UseStateExample from './playground/UseStateExample';
 import UseEffectExample from './playground/UseEffectExample';
+import UseContextExample from './playground/UseContextExample';
 import './App.css';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Route path="/playground" element={<HomeHooks />} />
         <Route path="/playground/usestate" element={<UseStateExample />} />
         <Route path="/playground/useeffect" element={<UseEffectExample />} />
+        <Route path="/playground/usecontext" element={<UseContextExample />} />
       </Routes>
     </Router>
   );

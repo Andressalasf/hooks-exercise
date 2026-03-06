@@ -21,7 +21,7 @@ const HomeHooks = () => {
       description: 'Consume datos de contexto sin prop drilling.',
       category: 'Contexto y datos externos',
       route: '/playground/usecontext',
-      implemented: false
+      implemented: true
     },
     {
       name: 'useReducer',
