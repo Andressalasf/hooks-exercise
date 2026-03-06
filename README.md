@@ -84,6 +84,35 @@ Un temporizador simple que cambia de color automáticamente cada 10 segundos.
 
 ---
 
+## Ejercicio 3: useContext
+
+### Descripción del Hook
+useContext permite consumir un valor de contexto dentro de un componente sin tener que pasar props por cada nivel del árbol de componentes. Se usa junto con createContext y un Provider. La sintaxis básica es:
+
+```javascript
+const valor = useContext(MiContexto);
+```
+
+### Ejercicio Desarrollado: Cambio de Tema e Idioma
+
+Dos contextos en un mismo archivo que permiten cambiar el tema (claro/oscuro) y el idioma (español/inglés) globalmente, sin pasar props entre componentes.
+
+#### Estados en los Contextos:
+
+1. **theme** (string): Tema actual, puede ser 'light' o 'dark'.
+2. **toggleTheme** (función): Alterna entre tema claro y oscuro.
+3. **lang** (string): Idioma actual, puede ser 'es' o 'en'.
+4. **toggleLang** (función): Alterna entre español e inglés.
+
+#### Funcionalidades Implementadas:
+
+- **Dos contextos en un archivo**: ThemeContext y LangContext definidos directamente en UseContextExample.jsx
+- **Navbar**: Consume ambos contextos y expone los dos botones de cambio
+- **Card**: Reacciona al tema e idioma sin recibir ningún prop
+- **Cambio global**: Al cambiar tema o idioma, todos los componentes se actualizan a la vez
+
+---
+
 ## Estructura del Proyecto
 
 ```
@@ -92,7 +121,7 @@ src/
     ├── HomeHooks.jsx          # Componente principal con tabla de hooks
     ├── UseStateExample.jsx     # Ejercicio de useState
     ├── UseEffectExample.jsx    # Ejercicio de useEffect
-    ├── UseContextExample.jsx   # Ejercicio de useContext (pendiente)
+    ├── UseContextExample.jsx   # Ejercicio de useContext
     └── UseReducerExample.jsx   # Ejercicio de useReducer (pendiente)
 ```
 
@@ -103,6 +132,7 @@ src/
 - **Home**: `/playground` - Muestra la tabla con todos los hooks disponibles
 - **useState**: `/playground/usestate` - Contador interactivo
 - **useEffect**: `/playground/useeffect` - Temporizador con cambio de color
+- **useContext**: `/playground/usecontext` - Cambio de tema claro/oscuro
 
 ---
 
