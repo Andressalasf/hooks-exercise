@@ -57,6 +57,33 @@ Para demostrar el uso práctico de `useState`, desarrollé un contador interacti
 - **Auto-ocultar mensaje**: El mensaje desaparece automáticamente después de 3 segundos
 - **Visualización en tiempo real**: Muestra todos los estados actuales
 
+---
+
+## Ejercicio 2: useEffect
+
+### Descripción del Hook
+El Hook `useEffect` permite ejecutar efectos secundarios en componentes funcionales. Se ejecuta después de que React actualiza el DOM y puede opcionalmente limpiar recursos. 
+
+### Ejercicio Desarrollado: Temporizador con Cambio de Color
+
+Un temporizador simple que cambia de color automáticamente cada 10 segundos.
+
+#### Estados Utilizados:
+
+1. **seconds** (number): Contador de segundos.
+2. **isActive** (boolean): Indica si el temporizador está activo.
+3. **color** (string): Color actual del temporizador.
+
+#### Funcionalidades Implementadas:
+
+- **Temporizador**: Cuenta segundos automáticamente
+- **Iniciar/Pausar**: Control del estado del temporizador
+- **Reiniciar**: Vuelve todo a cero
+- **Cambio de color**: Cada 10 segundos cambia aleatoriamente
+- **Limpieza**: useEffect limpia el interval correctamente
+
+---
+
 ## Estructura del Proyecto
 
 ```
@@ -64,7 +91,7 @@ src/
   playground/
     ├── HomeHooks.jsx          # Componente principal con tabla de hooks
     ├── UseStateExample.jsx     # Ejercicio de useState
-    ├── UseEffectExample.jsx    # Ejercicio de useEffect (pendiente)
+    ├── UseEffectExample.jsx    # Ejercicio de useEffect
     ├── UseContextExample.jsx   # Ejercicio de useContext (pendiente)
     └── UseReducerExample.jsx   # Ejercicio de useReducer (pendiente)
 ```
@@ -74,7 +101,8 @@ src/
 ## Navegación
 
 - **Home**: `/playground` - Muestra la tabla con todos los hooks disponibles
-- **useState**: `/playground/usestate` - Gestor de tareas
+- **useState**: `/playground/usestate` - Contador interactivo
+- **useEffect**: `/playground/useeffect` - Temporizador con cambio de color
 
 ---
 

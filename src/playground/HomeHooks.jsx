@@ -14,7 +14,7 @@ const HomeHooks = () => {
       description: 'Ejecuta efectos secundarios en componentes funcionales.',
       category: 'Efectos / ciclo de vida',
       route: '/playground/useeffect',
-      implemented: false
+      implemented: true
     },
     {
       name: 'useContext',
