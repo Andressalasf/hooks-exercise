@@ -4,7 +4,7 @@
 
 | Nombre Completo | Código | Hooks Asignados |
 |----------------|--------|-----------------|
-| Andrés Felipe Salas Niño | AFSN | useState, useEffect, useContext, useReducer |
+| Andrés Felipe Salas Niño | AFSN | useState, useEffect, useContext, useReducer, useRef, useMemo |
 
 ---
 
@@ -16,6 +16,8 @@
 | **useEffect** | Ejecuta efectos secundarios en componentes funcionales. | Efectos / ciclo de vida |
 | **useContext** | Consume datos de contexto sin prop drilling. | Contexto y datos externos |
 | **useReducer** | Maneja estado complejo mediante una función reductora. | Estado |
+| **useRef** | Persiste un valor mutable entre renders sin causar re-renderizaciones y permite acceder al DOM. | Referencias / DOM |
+| **useMemo** | Memoriza el resultado de un cálculo costoso y lo recalcula solo cuando cambian sus dependencias. | Rendimiento |
 
 ---
 
@@ -139,6 +141,40 @@ Un carrito sencillo con una lista fija de productos donde se pueden agregar y qu
 
 ---
 
+## Ejercicio 5: useRef
+
+### Descripción del Hook
+`useRef` retorna un objeto con una propiedad `.current` que persiste durante toda la vida del componente. A diferencia de `useState`, modificar `.current` no provoca un re-render. Tiene dos usos principales: acceder directamente a un elemento del DOM y guardar valores mutables entre renders. La sintaxis básica es:
+
+```javascript
+const ref = useRef(valorInicial);
+```
+
+Donde:
+- `ref.current`: es el valor actual almacenado (o la referencia al elemento del DOM)
+- `valorInicial`: el valor con el que se inicializa `ref.current`
+
+### Ejercicio Desarrollado: Enfoque DOM y Persistencia de Valores
+
+Panel que combina tres usos de `useRef`: una referencia de DOM, un contador de renders sin re-renderización y un rastreador de valor anterior.
+
+#### Refs Utilizados:
+
+1. **inputRef** (DOM ref): Se asigna al `<input>` de texto mediante el atributo `ref`. El botón "Enfocar" llama a `inputRef.current.focus()` para mover el cursor al campo sin modificar ningún estado.
+
+2. **renderCountRef** (valor mutable): Se incrementa en cada render del componente. Al no usar `setState`, su cambio no dispara renders adicionales.
+
+3. **prevTextRef** (valor previo): Almacena el texto guardado anteriormente usando un `useEffect`. En cada render ya contiene el valor del render anterior.
+
+#### Funcionalidades Implementadas:
+
+- **Enfocar input**: Un botón llama a `inputRef.current.focus()` directamente sobre el elemento DOM sin tocar el estado.
+- **Guardar texto**: Actualiza `savedText` (estado) y limpia el input, disparando un render donde `prevTextRef` aún conserva el valor anterior.
+- **Contador de renders**: Muestra cuántas veces se ha renderizado el componente usando `renderCountRef.current`, sin causar renders extra.
+- **Valor anterior**: Muestra en paralelo el valor guardado actual y el anterior, evidenciando la diferencia de temporalidad entre `useState` y `useRef`.
+
+---
+
 ## Estructura del Proyecto
 
 ```
@@ -148,7 +184,8 @@ src/
     ├── UseStateExample.jsx     # Ejercicio de useState
     ├── UseEffectExample.jsx    # Ejercicio de useEffect
     ├── UseContextExample.jsx   # Ejercicio de useContext
-    └── UseReducerExample.jsx   # Ejercicio de useReducer
+    ├── UseReducerExample.jsx   # Ejercicio de useReducer
+    └── UseRefExample.jsx       # Ejercicio de useRef
 ```
 
 ---
@@ -160,6 +197,7 @@ src/
 - **useEffect**: `/playground/useeffect` - Temporizador con cambio de color
 - **useContext**: `/playground/usecontext` - Cambio de tema e idioma
 - **useReducer**: `/playground/usereducer` - Carrito de compras
+- **useRef**: `/playground/useref` - Enfoque DOM y persistencia de valores
 
 ---
 

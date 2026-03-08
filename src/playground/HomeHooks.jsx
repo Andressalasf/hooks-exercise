@@ -29,6 +29,20 @@ const HomeHooks = () => {
       category: 'Estado',
       route: '/playground/usereducer',
       implemented: true
+    },
+    {
+      name: 'useRef',
+      description: 'Persiste un valor mutable entre renders sin causar re-renderizaciones y permite acceder al DOM.',
+      category: 'Referencias / DOM',
+      route: '/playground/useref',
+      implemented: true
+    },
+    {
+      name: 'useMemo',
+      description: 'Memoriza el resultado de un cálculo costoso y lo recalcula solo cuando cambian sus dependencias.',
+      category: 'Rendimiento',
+      route: '/playground/usememo',
+      implemented: false
     }
   ];
 
