@@ -42,7 +42,7 @@ const HomeHooks = () => {
       description: 'Memoriza el resultado de un cálculo costoso y lo recalcula solo cuando cambian sus dependencias.',
       category: 'Rendimiento',
       route: '/playground/usememo',
-      implemented: false
+      implemented: true
     }
   ];
 

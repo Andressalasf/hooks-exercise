@@ -5,6 +5,7 @@ import UseEffectExample from './playground/UseEffectExample';
 import UseContextExample from './playground/UseContextExample';
 import UseReducerExample from './playground/UseReducerExample';
 import UseRefExample from './playground/UseRefExample';
+import UseMemoExample from './playground/UseMemoExample';
 import './App.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/playground/usecontext" element={<UseContextExample />} />
         <Route path="/playground/usereducer" element={<UseReducerExample />} />
         <Route path="/playground/useref" element={<UseRefExample />} />
+        <Route path="/playground/usememo" element={<UseMemoExample />} />
       </Routes>
     </Router>
   );
