@@ -175,6 +175,41 @@ Panel que combina tres usos de `useRef`: una referencia de DOM, un contador de r
 
 ---
 
+## Ejercicio 6: useMemo
+
+### Descripción del Hook
+`useMemo` memoriza el resultado de un cálculo y solo lo vuelve a ejecutar cuando alguna de sus dependencias cambia. Es útil cuando hay valores derivados que dependen de un estado y no tiene sentido recalcularlos en cada render. La sintaxis básica es:
+
+```javascript
+const valor = useMemo(() => calculo(), [dependencias]);
+```
+
+Donde:
+- `calculo()`: la función que produce el valor memorizado
+- `dependencias`: array de valores que, al cambiar, disparan el recálculo
+
+### Ejercicio Desarrollado: Filtro de Estudiantes
+
+Un listado de estudiantes con notas donde `useMemo` calcula la lista filtrada y las estadísticas. Hay además un selector de color que modifica un estado sin relación con el filtro, lo que permite ver que el memo no se recalcula en ese caso.
+
+#### Memo Utilizado:
+
+1. **resultado** (objeto memorizado): contiene `filtrados` (lista de estudiantes que pasan el filtro), `promedio` y `mejor` nota. Se recalcula únicamente cuando cambia `minNota`.
+
+#### Estado Adicional:
+
+1. **minNota** (number): umbral mínimo de nota, controlado por un slider. Es la dependencia del memo.
+2. **tema** (string): color del encabezado. Cambia el estado del componente sin afectar el memo.
+
+#### Funcionalidades Implementadas:
+
+- **Slider de nota mínima**: al arrastrarlo se actualiza `minNota`, lo que dispara el recálculo de `useMemo`.
+- **Selector de color**: cambia el estado `tema` sin tocar `minNota`, demostrando que el memo no se vuelve a ejecutar.
+- **Encabezado con estadísticas**: muestra cuántos aprueban, el promedio y la nota más alta del grupo filtrado.
+- **Lista filtrada**: muestra cada estudiante que cumple el filtro con su nota, resaltando en verde los que superan 4.0.
+
+---
+
 ## Estructura del Proyecto
 
 ```
@@ -185,7 +220,8 @@ src/
     ├── UseEffectExample.jsx    # Ejercicio de useEffect
     ├── UseContextExample.jsx   # Ejercicio de useContext
     ├── UseReducerExample.jsx   # Ejercicio de useReducer
-    └── UseRefExample.jsx       # Ejercicio de useRef
+    ├── UseRefExample.jsx       # Ejercicio de useRef
+    └── UseMemoExample.jsx      # Ejercicio de useMemo
 ```
 
 ---
@@ -198,6 +234,7 @@ src/
 - **useContext**: `/playground/usecontext` - Cambio de tema e idioma
 - **useReducer**: `/playground/usereducer` - Carrito de compras
 - **useRef**: `/playground/useref` - Enfoque DOM y persistencia de valores
+- **useMemo**: `/playground/usememo` - Filtro de estudiantes
 
 ---
 
