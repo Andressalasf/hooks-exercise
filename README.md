@@ -382,6 +382,38 @@ Un catálogo de productos filtrable por categoría con pestañas de navegación.
 
 ---
 
+## Ejercicio 12: useTransition
+
+### Descripción del Hook
+`useTransition` permite marcar una actualización de estado como no urgente. React procesará esa actualización sin bloquear las interacciones del usuario (clics, escritura). Devuelve un booleano `isPending` que indica si la transición está en curso, útil para mostrar retroalimentación visual. La sintaxis básica es:
+
+```javascript
+const [isPending, startTransition] = useTransition();
+```
+
+Donde:
+- `isPending`: `true` mientras React está procesando la actualización marcada como transición
+- `startTransition(fn)`: función que envuelve la actualización de estado no urgente
+
+### Ejercicio Desarrollado: Panel de Datos por Módulo
+
+Un panel con cuatro pestañas (Ventas, Clientes, Productos, Reportes), cada una con 300 registros generados. El cambio de pestaña se envuelve en `startTransition`, marcándolo como no urgente. Mientras React procesa la actualización, `isPending` activa un indicador "Cargando..." y atenúa la lista, mientras las pestañas permanecen completamente clicables, demostrando que la UI no se bloquea.
+
+#### Valores retornados:
+
+1. **isPending** (boolean): `true` durante el procesamiento de la transición. Controla la opacidad de la lista y la visibilidad del indicador.
+2. **startTransition(fn)**: envuelve el `setTabActiva(tab)` para marcarlo como no urgente.
+
+#### Funcionalidades Implementadas:
+
+- **4 pestañas de módulos**: cada una carga 300 registros distintos usando `startTransition`.
+- **Indicador de transición**: texto "Cargando..." animado con `animate-pulse` visible solo cuando `isPending` es `true`.
+- **Lista semitransparente**: la tabla de registros se atenúa durante la transición y vuelve a su opacidad normal al terminar.
+- **Estadísticas por módulo**: total de registros, cantidad de activos y valor total del módulo activo.
+- **Registros con estado**: cada ítem muestra su estado (Activo / Pendiente / Cerrado) con color distintivo.
+
+---
+
 ## Estructura del Proyecto
 
 ```
@@ -398,7 +430,8 @@ src/
     ├── UseDebugValueExample.jsx          # Ejercicio de useDebugValue
     ├── UseIdExample.jsx                  # Ejercicio de useId
     ├── UseDeferredValueExample.jsx       # Ejercicio de useDeferredValue
-    └── UseLayoutEffectExample.jsx        # Ejercicio de useLayoutEffect
+    ├── UseLayoutEffectExample.jsx        # Ejercicio de useLayoutEffect
+    └── UseTransitionExample.jsx          # Ejercicio de useTransition
 ```
 
 ---
@@ -417,6 +450,7 @@ src/
 - **useId**: `/playground/useid` - Formularios con IDs únicos sin colisión
 - **useDeferredValue**: `/playground/usedeferredvalue` - Buscador de productos con lista diferida
 - **useLayoutEffect**: `/playground/uselayouteffect` - Catálogo con indicador de pestaña animado
+- **useTransition**: `/playground/usetransition` - Panel de datos por módulo con transición no urgente
 
 ---
 

@@ -11,6 +11,7 @@ import UseDebugValueExample from './playground/UseDebugValueExample';
 import UseIdExample from './playground/UseIdExample';
 import UseDeferredValueExample from './playground/UseDeferredValueExample';
 import UseLayoutEffectExample from './playground/UseLayoutEffectExample';
+import UseTransitionExample from './playground/UseTransitionExample';
 import './App.css';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
         <Route path="/playground/useid" element={<UseIdExample />} />
         <Route path="/playground/usedeferredvalue" element={<UseDeferredValueExample />} />
         <Route path="/playground/uselayouteffect" element={<UseLayoutEffectExample />} />
+        <Route path="/playground/usetransition" element={<UseTransitionExample />} />
       </Routes>
     </Router>
   );
