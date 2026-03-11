@@ -33,16 +33,58 @@ const HomeHooks = () => {
     {
       name: 'useRef',
       description: 'Persiste un valor mutable entre renders sin causar re-renderizaciones y permite acceder al DOM.',
-      category: 'Referencias / DOM',
+      category: 'Referencias',
       route: '/playground/useref',
       implemented: true
     },
     {
       name: 'useMemo',
       description: 'Memoriza el resultado de un cálculo costoso y lo recalcula solo cuando cambian sus dependencias.',
-      category: 'Rendimiento',
+      category: 'Performance',
       route: '/playground/usememo',
       implemented: true
+    },
+    {
+      name: 'useCallback',
+      description: 'Memoriza la referencia de una función para evitar re-renders innecesarios en componentes hijos.',
+      category: 'Performance',
+      route: '/playground/usecallback',
+      implemented: true
+    },
+    {
+      name: 'useDebugValue',
+      description: 'Muestra una etiqueta personalizada para hooks personalizados en React DevTools.',
+      category: 'Debug',
+      route: '/playground/usedebugvalue',
+      implemented: false
+    },
+    {
+      name: 'useId',
+      description: 'Genera identificadores únicos y estables para vincular elementos de formulario accesibles.',
+      category: 'Contexto y datos externos',
+      route: '/playground/useid',
+      implemented: false
+    },
+    {
+      name: 'useDeferredValue',
+      description: 'Difiere la actualización de un valor no urgente para mantener la interfaz responsiva.',
+      category: 'Performance',
+      route: '/playground/usedeferredvalue',
+      implemented: false
+    },
+    {
+      name: 'useLayoutEffect',
+      description: 'Ejecuta efectos síncronamente tras las mutaciones del DOM, antes de que el navegador pinte.',
+      category: 'Efectos / ciclo de vida',
+      route: '/playground/uselayouteffect',
+      implemented: false
+    },
+    {
+      name: 'useTransition',
+      description: 'Marca actualizaciones de estado como no urgentes para priorizar interacciones del usuario.',
+      category: 'Performance',
+      route: '/playground/usetransition',
+      implemented: false
     }
   ];
 
