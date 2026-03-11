@@ -63,7 +63,7 @@ const HomeHooks = () => {
       description: 'Genera identificadores únicos y estables para vincular elementos de formulario accesibles.',
       category: 'Contexto y datos externos',
       route: '/playground/useid',
-      implemented: false
+      implemented: true
     },
     {
       name: 'useDeferredValue',
