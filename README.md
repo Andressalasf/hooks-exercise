@@ -5,6 +5,7 @@
 | Nombre Completo | Código | Hooks Asignados |
 |----------------|--------|-----------------|
 | Andrés Felipe Salas Niño | AFSN | useState, useEffect, useContext, useReducer, useRef, useMemo |
+| Javier Andres Quintero Clavijo | JAQC | useCallback, useDebugValue, useId, useDeferredValue, useLayoutEffect, useTransition |
 
 ---
 
@@ -16,8 +17,14 @@
 | **useEffect** | Ejecuta efectos secundarios en componentes funcionales. | Efectos / ciclo de vida |
 | **useContext** | Consume datos de contexto sin prop drilling. | Contexto y datos externos |
 | **useReducer** | Maneja estado complejo mediante una función reductora. | Estado |
-| **useRef** | Persiste un valor mutable entre renders sin causar re-renderizaciones y permite acceder al DOM. | Referencias / DOM |
-| **useMemo** | Memoriza el resultado de un cálculo costoso y lo recalcula solo cuando cambian sus dependencias. | Rendimiento |
+| **useRef** | Persiste un valor mutable entre renders sin causar re-renderizaciones y permite acceder al DOM. | Referencias |
+| **useMemo** | Memoriza el resultado de un cálculo costoso y lo recalcula solo cuando cambian sus dependencias. | Performance |
+| **useCallback** | Memoriza la referencia de una función para evitar re-renders innecesarios en componentes hijos. | Performance |
+| **useDebugValue** | Muestra una etiqueta personalizada para hooks personalizados en React DevTools. | Debug |
+| **useId** | Genera identificadores únicos y estables para vincular elementos de formulario accesibles. | Contexto y datos externos |
+| **useDeferredValue** | Difiere la actualización de un valor no urgente para mantener la interfaz responsiva. | Performance |
+| **useLayoutEffect** | Ejecuta efectos síncronamente tras las mutaciones del DOM, antes de que el navegador pinte. | Efectos / ciclo de vida |
+| **useTransition** | Marca actualizaciones de estado como no urgentes para priorizar interacciones del usuario. | Performance |
 
 ---
 
@@ -210,18 +217,55 @@ Un listado de estudiantes con notas donde `useMemo` calcula la lista filtrada y 
 
 ---
 
+## Ejercicio 7: useCallback
+
+### Descripción del Hook
+`useCallback` memoriza la referencia de una función y solo la recrea cuando alguna de sus dependencias cambia. Sin este hook, cada render del componente padre genera una nueva referencia de función, lo que provoca que los componentes hijos envueltos en `React.memo` se vuelvan a renderizar aunque sus props no hayan cambiado en valor. La sintaxis básica es:
+
+```javascript
+const fn = useCallback(() => lógica(), [dependencias]);
+```
+
+Donde:
+- `lógica()`: la función que se quiere memorizar
+- `dependencias`: array de valores que, al cambiar, provocan que la función se recree con una nueva referencia
+
+### Ejercicio Desarrollado: Lista de Tareas con React.memo
+
+Un gestor de tareas donde los ítems individuales están envueltos en `React.memo`. El componente padre tiene un contador independiente que al incrementarse provoca un re-render del padre, demostrando que los hijos **no se re-renderizan** gracias a que los callbacks están estabilizados con `useCallback`.
+
+#### Callbacks Memorizados:
+
+1. **handleToggle** `useCallback([])`: marca o desmarca una tarea como completada. Dependencias vacías porque usa el patrón funcional de `setTareas`.
+
+2. **handleEliminar** `useCallback([])`: elimina una tarea por id. Misma razón que el anterior.
+
+3. **handleAgregar** `useCallback([nuevaTarea])`: agrega una tarea nueva al listado. Depende de `nuevaTarea` porque necesita leer su valor actual.
+
+#### Funcionalidades Implementadas:
+
+- **Contador independiente**: al incrementarlo el padre se re-renderiza, pero los `TareaItem` (React.memo) no se re-renderizan si sus callbacks no cambiaron.
+- **Contador de renders por tarea**: cada ítem muestra cuántas veces se ha renderizado usando `useRef`, evidenciando la optimización.
+- **Marcar/desmarcar tarea**: checkbox que alterna el estado `completada` de la tarea.
+- **Eliminar tarea**: botón que filtra la tarea del array de estado.
+- **Agregar tarea**: input con botón y soporte de tecla Enter para añadir nuevas tareas.
+- **Estadísticas en tiempo real**: muestra el total, completadas y pendientes del listado.
+
+---
+
 ## Estructura del Proyecto
 
 ```
 src/
   playground/
-    ├── HomeHooks.jsx          # Componente principal con tabla de hooks
-    ├── UseStateExample.jsx     # Ejercicio de useState
-    ├── UseEffectExample.jsx    # Ejercicio de useEffect
-    ├── UseContextExample.jsx   # Ejercicio de useContext
-    ├── UseReducerExample.jsx   # Ejercicio de useReducer
-    ├── UseRefExample.jsx       # Ejercicio de useRef
-    └── UseMemoExample.jsx      # Ejercicio de useMemo
+    ├── HomeHooks.jsx              # Componente principal con tabla de hooks
+    ├── UseStateExample.jsx         # Ejercicio de useState
+    ├── UseEffectExample.jsx        # Ejercicio de useEffect
+    ├── UseContextExample.jsx       # Ejercicio de useContext
+    ├── UseReducerExample.jsx       # Ejercicio de useReducer
+    ├── UseRefExample.jsx           # Ejercicio de useRef
+    ├── UseMemoExample.jsx          # Ejercicio de useMemo
+    └── UseCallbackExample.jsx      # Ejercicio de useCallback
 ```
 
 ---
@@ -235,6 +279,7 @@ src/
 - **useReducer**: `/playground/usereducer` - Carrito de compras
 - **useRef**: `/playground/useref` - Enfoque DOM y persistencia de valores
 - **useMemo**: `/playground/usememo` - Filtro de estudiantes
+- **useCallback**: `/playground/usecallback` - Lista de tareas con React.memo
 
 ---
 
