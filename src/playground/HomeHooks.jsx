@@ -77,7 +77,7 @@ const HomeHooks = () => {
       description: 'Ejecuta efectos síncronamente tras las mutaciones del DOM, antes de que el navegador pinte.',
       category: 'Efectos / ciclo de vida',
       route: '/playground/uselayouteffect',
-      implemented: false
+      implemented: true
     },
     {
       name: 'useTransition',

@@ -350,6 +350,38 @@ Un buscador sobre una lista de 500 productos. El input actualiza el estado de b�
 
 ---
 
+## Ejercicio 11: useLayoutEffect
+
+### Descripción del Hook
+`useLayoutEffect` tiene la misma firma que `useEffect`, pero se ejecuta síncronamente después de que React aplica los cambios al DOM y **antes** de que el navegador pinte la pantalla. Esto permite leer medidas del DOM y ajustar la UI de forma inmediata, evitando el parpadeo visual que causaría un `useEffect` equivalente al ejecutarse después del pintado. La sintaxis básica es:
+
+```javascript
+useLayoutEffect(() => { medirDOM(); }, [dependencias]);
+```
+
+Donde:
+- La función se ejecuta tras cada render en que cambien las dependencias, pero antes del pintado
+- Es ideal para lecturas de layout (posición, tamaño) que requieren actualización inmediata
+
+### Ejercicio Desarrollado: Catálogo con Indicador de Pestaña Animado
+
+Un catálogo de productos filtrable por categoría con pestañas de navegación. El indicador azul que se desliza bajo la pestaña activa se posiciona usando `useLayoutEffect`, que mide el ancho y la posición real de cada pestaña en el DOM antes de que el navegador pinte. Esto garantiza que el indicador aparezca en la posición correcta desde el primer frame, sin saltos visibles.
+
+#### Refs y medidas:
+
+1. **tabsRef**: array de refs, uno por pestaña, para acceder a sus dimensiones reales con `getBoundingClientRect()`.
+2. **contenedorRef**: ref del contenedor de pestañas, usado como punto de referencia para calcular el `left` relativo.
+3. **indicador**: estado `{ left, width }` que controla la posición y ancho del indicador azul.
+
+#### Funcionalidades Implementadas:
+
+- **Indicador deslizante**: barra azul que se mueve suavemente bajo la pestaña activa, posicionada con medidas reales del DOM.
+- **Medición en tiempo real**: muestra los valores calculados por `useLayoutEffect` (`left` y `width` en px) debajo de las pestañas.
+- **Filtro por categoría**: al cambiar de pestaña, la lista de productos se filtra y el indicador se reposiciona antes del pintado.
+- **Catálogo de productos**: 8 productos en 4 categorías con nombre, categoría y precio.
+
+---
+
 ## Estructura del Proyecto
 
 ```
@@ -365,7 +397,8 @@ src/
     ├── UseCallbackExample.jsx            # Ejercicio de useCallback
     ├── UseDebugValueExample.jsx          # Ejercicio de useDebugValue
     ├── UseIdExample.jsx                  # Ejercicio de useId
-    └── UseDeferredValueExample.jsx       # Ejercicio de useDeferredValue
+    ├── UseDeferredValueExample.jsx       # Ejercicio de useDeferredValue
+    └── UseLayoutEffectExample.jsx        # Ejercicio de useLayoutEffect
 ```
 
 ---
@@ -383,6 +416,7 @@ src/
 - **useDebugValue**: `/playground/usedebugvalue` - Formulario de registro con validación
 - **useId**: `/playground/useid` - Formularios con IDs únicos sin colisión
 - **useDeferredValue**: `/playground/usedeferredvalue` - Buscador de productos con lista diferida
+- **useLayoutEffect**: `/playground/uselayouteffect` - Catálogo con indicador de pestaña animado
 
 ---
 
