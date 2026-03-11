@@ -10,6 +10,7 @@ import UseCallbackExample from './playground/UseCallbackExample';
 import UseDebugValueExample from './playground/UseDebugValueExample';
 import UseIdExample from './playground/UseIdExample';
 import UseDeferredValueExample from './playground/UseDeferredValueExample';
+import UseLayoutEffectExample from './playground/UseLayoutEffectExample';
 import './App.css';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path="/playground/usedebugvalue" element={<UseDebugValueExample />} />
         <Route path="/playground/useid" element={<UseIdExample />} />
         <Route path="/playground/usedeferredvalue" element={<UseDeferredValueExample />} />
+        <Route path="/playground/uselayouteffect" element={<UseLayoutEffectExample />} />
       </Routes>
     </Router>
   );
