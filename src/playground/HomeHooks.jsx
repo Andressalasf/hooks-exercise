@@ -84,7 +84,7 @@ const HomeHooks = () => {
       description: 'Marca actualizaciones de estado como no urgentes para priorizar interacciones del usuario.',
       category: 'Performance',
       route: '/playground/usetransition',
-      implemented: false
+      implemented: true
     }
   ];
 
