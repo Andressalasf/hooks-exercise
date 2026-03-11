@@ -289,6 +289,34 @@ Un formulario de registro con tres campos (nombre, correo y contraseña) gestion
 
 ---
 
+## Ejercicio 9: useId
+
+### Descripción del Hook
+`useId` genera un identificador único y estable por cada llamada al hook. Está diseñado para vincular elementos de formulario accesibles mediante los atributos `htmlFor` e `id` dentro de componentes reutilizables, evitando colisiones de IDs cuando el mismo componente se renderiza varias veces en la misma página. La sintaxis básica es:
+
+```javascript
+const id = useId();
+```
+
+Donde:
+- `id`: cadena única generada por React, estable entre renders del mismo componente
+
+### Ejercicio Desarrollado: Formularios con IDs sin Colisión
+
+Dos instancias del mismo componente `FormularioReserva` se renderizan en paralelo. Cada campo de texto es un componente reutilizable `CampoTexto` que llama internamente a `useId` para generar su propio ID único. El ID generado se muestra visualmente junto a cada etiqueta, evidenciando que ningún ID se repite entre formularios aunque usen exactamente el mismo componente.
+
+#### Componente Reutilizable:
+
+1. **CampoTexto**: genera su propio `id` con `useId`, lo asigna al `<input>` y lo vincula al `<label>` mediante `htmlFor`. Muestra el ID en un badge azul junto a la etiqueta.
+
+#### Funcionalidades Implementadas:
+
+- **Dos formularios paralelos**: `Formulario A` y `Formulario B` usan el mismo componente pero con IDs únicos y sin colisión.
+- **Badge de ID visible**: cada campo muestra en tiempo real el ID generado por `useId`, haciendo evidente la unicidad.
+- **Accesibilidad correcta**: el `<label>` apunta al `<input>` correcto mediante `htmlFor`, comportamiento que se rompería con IDs manuales repetidos.
+
+---
+
 ## Estructura del Proyecto
 
 ```
@@ -302,7 +330,8 @@ src/
     ├── UseRefExample.jsx              # Ejercicio de useRef
     ├── UseMemoExample.jsx             # Ejercicio de useMemo
     ├── UseCallbackExample.jsx         # Ejercicio de useCallback
-    └── UseDebugValueExample.jsx       # Ejercicio de useDebugValue
+    ├── UseDebugValueExample.jsx       # Ejercicio de useDebugValue
+    └── UseIdExample.jsx               # Ejercicio de useId
 ```
 
 ---
@@ -318,6 +347,7 @@ src/
 - **useMemo**: `/playground/usememo` - Filtro de estudiantes
 - **useCallback**: `/playground/usecallback` - Lista de tareas con React.memo
 - **useDebugValue**: `/playground/usedebugvalue` - Formulario de registro con validación
+- **useId**: `/playground/useid` - Formularios con IDs únicos sin colisión
 
 ---
 

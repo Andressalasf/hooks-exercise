@@ -8,6 +8,7 @@ import UseRefExample from './playground/UseRefExample';
 import UseMemoExample from './playground/UseMemoExample';
 import UseCallbackExample from './playground/UseCallbackExample';
 import UseDebugValueExample from './playground/UseDebugValueExample';
+import UseIdExample from './playground/UseIdExample';
 import './App.css';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
         <Route path="/playground/usememo" element={<UseMemoExample />} />
         <Route path="/playground/usecallback" element={<UseCallbackExample />} />
         <Route path="/playground/usedebugvalue" element={<UseDebugValueExample />} />
+        <Route path="/playground/useid" element={<UseIdExample />} />
       </Routes>
     </Router>
   );
