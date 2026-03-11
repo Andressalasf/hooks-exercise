@@ -253,19 +253,56 @@ Un gestor de tareas donde los ítems individuales están envueltos en `React.mem
 
 ---
 
+## Ejercicio 8: useDebugValue
+
+### Descripción del Hook
+`useDebugValue` permite añadir una etiqueta descriptiva y personalizada a un hook personalizado, visible en React DevTools al inspeccionar el árbol de componentes. Acepta un segundo argumento opcional de formato que solo se ejecuta cuando DevTools está abierto, evitando cálculos innecesarios. La sintaxis básica es:
+
+```javascript
+useDebugValue(valor, valor => formatear(valor));
+```
+
+Donde:
+- `valor`: el estado o dato que se quiere etiquetar en DevTools
+- `valor => formatear(valor)`: función opcional que transforma el valor en una cadena legible
+
+### Ejercicio Desarrollado: Formulario de Registro con Validación
+
+Un formulario de registro con tres campos (nombre, correo y contraseña) gestionados por el hook personalizado `useFormField`. Cada instancia del hook usa `useDebugValue` con una función formateadora para mostrar en DevTools el valor actual, su estado de validez y si el campo fue tocado. Se incluye un panel simulador de DevTools en la UI que replica en tiempo real lo que se vería en las herramientas de desarrollo.
+
+#### Hook Personalizado:
+
+1. **useFormField(valorInicial, validar)**: encapsula el estado `value`, `touched` y la lógica de validación. Usa `useDebugValue` con formateador para exponer `"valor" | ✓/✗ válido | tocado/sin tocar`.
+
+#### Validaciones por Campo:
+
+1. **nombre**: mínimo 3 caracteres.
+2. **email**: expresión regular de formato de correo electrónico.
+3. **password**: mínimo 6 caracteres.
+
+#### Funcionalidades Implementadas:
+
+- **Simulador de DevTools**: panel oscuro que muestra en tiempo real la etiqueta que `useDebugValue` expone para cada campo, incluyendo enmascaramiento de la contraseña.
+- **Validación por campo**: cada campo valida al perder el foco (`onBlur`) y muestra mensaje de error o confirmación verde.
+- **Botón de envío**: deshabilitado hasta que los tres campos sean válidos.
+- **Pantalla de éxito**: al registrarse correctamente muestra confirmación y opción de resetear el formulario.
+
+---
+
 ## Estructura del Proyecto
 
 ```
 src/
   playground/
-    ├── HomeHooks.jsx              # Componente principal con tabla de hooks
-    ├── UseStateExample.jsx         # Ejercicio de useState
-    ├── UseEffectExample.jsx        # Ejercicio de useEffect
-    ├── UseContextExample.jsx       # Ejercicio de useContext
-    ├── UseReducerExample.jsx       # Ejercicio de useReducer
-    ├── UseRefExample.jsx           # Ejercicio de useRef
-    ├── UseMemoExample.jsx          # Ejercicio de useMemo
-    └── UseCallbackExample.jsx      # Ejercicio de useCallback
+    ├── HomeHooks.jsx                 # Componente principal con tabla de hooks
+    ├── UseStateExample.jsx            # Ejercicio de useState
+    ├── UseEffectExample.jsx           # Ejercicio de useEffect
+    ├── UseContextExample.jsx          # Ejercicio de useContext
+    ├── UseReducerExample.jsx          # Ejercicio de useReducer
+    ├── UseRefExample.jsx              # Ejercicio de useRef
+    ├── UseMemoExample.jsx             # Ejercicio de useMemo
+    ├── UseCallbackExample.jsx         # Ejercicio de useCallback
+    └── UseDebugValueExample.jsx       # Ejercicio de useDebugValue
 ```
 
 ---
@@ -280,6 +317,7 @@ src/
 - **useRef**: `/playground/useref` - Enfoque DOM y persistencia de valores
 - **useMemo**: `/playground/usememo` - Filtro de estudiantes
 - **useCallback**: `/playground/usecallback` - Lista de tareas con React.memo
+- **useDebugValue**: `/playground/usedebugvalue` - Formulario de registro con validación
 
 ---
 

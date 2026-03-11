@@ -56,7 +56,7 @@ const HomeHooks = () => {
       description: 'Muestra una etiqueta personalizada para hooks personalizados en React DevTools.',
       category: 'Debug',
       route: '/playground/usedebugvalue',
-      implemented: false
+      implemented: true
     },
     {
       name: 'useId',
