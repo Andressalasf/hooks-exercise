@@ -317,21 +317,55 @@ Dos instancias del mismo componente `FormularioReserva` se renderizan en paralel
 
 ---
 
+## Ejercicio 10: useDeferredValue
+
+### Descripción del Hook
+`useDeferredValue` recibe un valor y devuelve una versión diferida del mismo. React actualiza el valor diferido solo cuando no hay actualizaciones más urgentes pendientes, como las causadas por la interacción directa del usuario. Es útil para mantener la interfaz responsiva mientras se procesan listas grandes o cálculos costosos derivados de ese valor. La sintaxis básica es:
+
+```javascript
+const valorDiferido = useDeferredValue(valor);
+```
+
+Donde:
+- `valor`: el valor urgente que se actualiza inmediatamente (ej. el texto del input)
+- `valorDiferido`: la versión que React puede retrasar para priorizar otras actualizaciones
+
+### Ejercicio Desarrollado: Buscador de Productos con Lista Diferida
+
+Un buscador sobre una lista de 500 productos. El input actualiza el estado de búsqueda de forma inmediata, pero la lista filtra usando el valor diferido. Se muestra en tiempo real la diferencia entre el valor actual y el diferido, y la lista se vuelve semitransparente mientras está desactualizada, evidenciando cuándo React está procesando la actualización en segundo plano.
+
+#### Estados y valores:
+
+1. **busqueda** (string): valor urgente, se actualiza en cada tecla del input.
+2. **deferredBusqueda** (string): versión diferida de `busqueda`, actualizada por React cuando el hilo está libre.
+3. **isStale** (boolean): `busqueda !== deferredBusqueda`, indica que la lista aún no refleja el valor actual.
+
+#### Funcionalidades Implementadas:
+
+- **Input responsivo**: actualiza `busqueda` inmediatamente sin bloquear el hilo.
+- **Lista diferida**: filtra 500 productos usando `deferredBusqueda` dentro de un `useMemo`.
+- **Indicador de valores**: muestra en tiempo real el valor actual (azul) y el diferido (morado).
+- **Indicador de actualización**: badge amarillo "Actualizando lista..." visible cuando `isStale` es `true`.
+- **Opacidad de lista**: la lista se atenúa mientras está desactualizada y vuelve a su opacidad normal al sincronizarse.
+
+---
+
 ## Estructura del Proyecto
 
 ```
 src/
   playground/
-    ├── HomeHooks.jsx                 # Componente principal con tabla de hooks
-    ├── UseStateExample.jsx            # Ejercicio de useState
-    ├── UseEffectExample.jsx           # Ejercicio de useEffect
-    ├── UseContextExample.jsx          # Ejercicio de useContext
-    ├── UseReducerExample.jsx          # Ejercicio de useReducer
-    ├── UseRefExample.jsx              # Ejercicio de useRef
-    ├── UseMemoExample.jsx             # Ejercicio de useMemo
-    ├── UseCallbackExample.jsx         # Ejercicio de useCallback
-    ├── UseDebugValueExample.jsx       # Ejercicio de useDebugValue
-    └── UseIdExample.jsx               # Ejercicio de useId
+    ├── HomeHooks.jsx                    # Componente principal con tabla de hooks
+    ├── UseStateExample.jsx               # Ejercicio de useState
+    ├── UseEffectExample.jsx              # Ejercicio de useEffect
+    ├── UseContextExample.jsx             # Ejercicio de useContext
+    ├── UseReducerExample.jsx             # Ejercicio de useReducer
+    ├── UseRefExample.jsx                 # Ejercicio de useRef
+    ├── UseMemoExample.jsx                # Ejercicio de useMemo
+    ├── UseCallbackExample.jsx            # Ejercicio de useCallback
+    ├── UseDebugValueExample.jsx          # Ejercicio de useDebugValue
+    ├── UseIdExample.jsx                  # Ejercicio de useId
+    └── UseDeferredValueExample.jsx       # Ejercicio de useDeferredValue
 ```
 
 ---
@@ -348,6 +382,7 @@ src/
 - **useCallback**: `/playground/usecallback` - Lista de tareas con React.memo
 - **useDebugValue**: `/playground/usedebugvalue` - Formulario de registro con validación
 - **useId**: `/playground/useid` - Formularios con IDs únicos sin colisión
+- **useDeferredValue**: `/playground/usedeferredvalue` - Buscador de productos con lista diferida
 
 ---
 

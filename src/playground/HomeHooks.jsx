@@ -70,7 +70,7 @@ const HomeHooks = () => {
       description: 'Difiere la actualización de un valor no urgente para mantener la interfaz responsiva.',
       category: 'Performance',
       route: '/playground/usedeferredvalue',
-      implemented: false
+      implemented: true
     },
     {
       name: 'useLayoutEffect',
