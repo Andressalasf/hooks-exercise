@@ -119,7 +119,7 @@ const HomeHooks = () => {
       description: 'Actualiza la interfaz de usuario / UI de manera optimista.',
       category: 'Estado',
       route: '/playground/useoptimistic',
-      implemented: false
+      implemented: true
     },
     {
       name: 'useSyncExternalStore',

@@ -525,7 +525,7 @@ useInsertionEffect(setup, dependencies?);
 
 Donde:
 - `setup`: función conteniendo la lógica de los efectos
-- `dependicies`: opcional, lista de los valores reactivos referenciados en el código de `setup`
+- `dependencies`: opcional, lista de los valores reactivos referenciados en el código de `setup`
 
 ### Ejercicio Desarrollado: Cambio de tema / inserción de CSS antes de carga del DOM
 
@@ -538,6 +538,37 @@ Un ejemplo de carga de CSS previo al resto del DOM, manteniendo en su medida el 
 #### Funcionalidades Implementadas:
 
 - **Cambiar a Tema**: cambia el estado de `tema` para que sea aplicado al elemento de demostración
+
+---
+
+## Ejercicio 17: useOptimistic
+
+### Descripción del Hook
+`useOptimistic` permite actualizar la interfaz de usuario / UI de manera optimista.
+
+```javascript
+const [optimisticState, setOptimistic] = useOptimistic(value, reducer?);
+```
+
+Donde:
+- **value**: valor devuelto inicialmente y mientras no haya acciones pendientes
+- **reducer**: opcional, función que especifica como el estado optimista es actualizado, debe ser una función pura y devuelve el estado optimista resultante
+
+### Ejercicio Desarrollado: Actualización optimista de lista en formulario
+
+Se realiza un listado de elementos de texto al que se le pueden agregar otros adicionales, el hook se encarga de mostrar los valores agregados en la UI al instante
+mientras son almacenados indicando esta acción
+
+#### Valores retornados:
+
+1. **optimistiState**: el estado optimista actual
+2. **setOptimistic**: es la función a llamar para actualizar el estado optimista a un valor diferente dentro de una Acción
+
+#### Funcionalidades Implementadas:
+
+- **Entregar Mensaje**: simula el envio del texto con una pausa y muestra un mensaje de espera.
+- **Thread**: se encarga de recibir el texto y construir la lista a medida que se agregan elementos, mostrando el mensaje de forma optimista al presionar enviar
+-**Enviar Mensaje**: realiza la operacion de enviar los datos, esparando a EntregarMensaje
 
 ---
 ## Estructura del Proyecto
@@ -587,7 +618,7 @@ src/
 - **useEffectEvent**: `/playground/useeffectevent` - Temporizador con los valores de intervalo mas recientes dados
 - **useImperativeHandle**: `/playground/useimperativehandle` - Realizar acciones en una casilla de texto desde un nivel superior
 - **useInsertionEffect**: `/playground/useinsertioneffect` - Cambio de tema / inserción de CSS antes de carga del DOM
-- **useOptimistic**: `/playground/useoptimistic` - 
+- **useOptimistic**: `/playground/useoptimistic` - Actualización optimista de lista en formulario
 - **useSyncExternalStore**: `/playground/usesyncexternalstore` - 
 
 ---
