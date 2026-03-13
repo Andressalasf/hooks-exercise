@@ -126,7 +126,7 @@ const HomeHooks = () => {
       description: 'Permite suscribirse a una fuente de almacenamiento de datos (store) externa.',
       category: 'Contexto y datos externos',
       route: '/playground/usesyncexternalstore',
-      implemented: false
+      implemented: true
     }
   ];
 
