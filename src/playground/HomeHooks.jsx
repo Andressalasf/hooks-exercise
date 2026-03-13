@@ -98,7 +98,7 @@ const HomeHooks = () => {
       description: 'Ejecuta efectos secundarios basado en eventos específicos.',
       category: 'Efectos / ciclo de vida',
       route: '/playground/useeffectevent',
-      implemented: false
+      implemented: true
     },
     {
       name: 'useImperativeHandle',
