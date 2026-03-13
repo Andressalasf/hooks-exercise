@@ -14,6 +14,7 @@ import UseLayoutEffectExample from './playground/UseLayoutEffectExample';
 import UseTransitionExample from './playground/UseTransitionExample';
 import UseActionStateExample from './playground/UseActionStateExample';
 import UseEffectEventExample from './playground/UseEffectEventExample';
+import UseImperativeHandleExample from './playground/UseImperativeHandleExample';
 import './App.css';
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
         <Route path="/playground/usetransition" element={<UseTransitionExample />} />
         <Route path="/playground/useactionstate" element={<UseActionStateExample />} />
         <Route path="/playground/useeffectevent" element={<UseEffectEventExample />} />
+        <Route path="/playground/useimperativehandle" element={<UseImperativeHandleExample />} />
       </Routes>
     </Router>
   );

@@ -483,6 +483,36 @@ Un temporizador cuyo intervalo de conteo es modificable sin reiniciar completame
 
 ---
 
+## Ejercicio 15: useImperativeHandle
+
+### Descripción del Hook
+`useImperativeHandle` permite personalizar el identificador expuesto como una ref.
+
+```javascript
+useImperativeHandle(ref, createHandle, dependencies?);
+```
+
+Donde:
+- `ref`: referencia recibida como prop del componente usado
+- `createHandle`: una función sin argumentos que devuelve el identificador ref que se quiere exponer
+- `dependencies`: opcional, lista de valores reactivos que se hacen referencia en `createHandle`
+
+### Ejercicio Desarrollado: Realizar acciones en una casilla de texto desde un nivel superior
+
+Se realizo una demostracion simple usando un campo de introducción de texto creado a partir de una función en un nivel inferior cuya ref fue expuesta con `useImperativeHandle`
+y se demostró que se pueden realizar acciones desde un nivel superior usando esa ref.
+
+#### Valores retornados:
+
+1. **inputRef**: la referencia expuesta con la que se puede trabajar desde una instancia madre
+
+#### Funcionalidades Implementadas:
+
+- **MiEntrada**: funcion con ref expuesta usando `useImperativeHandle` para su manipulacion desde un nivel superior
+- **Enfocar entrada**: se aplica foco a la entrada de texto usando `inputRef`
+- **Limpiar entrada**: se limpia la entrada de texto usando `inputRef`
+
+---
 ## Estructura del Proyecto
 
 ```
@@ -528,7 +558,7 @@ src/
 - **useTransition**: `/playground/usetransition` - Panel de datos por módulo con transición no urgente
 - **useActionState**: `/playgrond/useactionstate` - Carrito de compra con actualización de valor al final
 - **useEffectEvent**: `/playground/useeffectevent` - Temporizador con los valores de intervalo mas recientes dados
-- **useImperativeHandle**: `/playground/useimperativehandle` - 
+- **useImperativeHandle**: `/playground/useimperativehandle` - Realizar acciones en una casilla de texto desde un nivel superior
 - **useInsertionEffect**: `/playground/useinsertioneffect` - 
 - **useOptimistic**: `/playground/useoptimistic` - 
 - **useSyncExternalStore**: `/playground/usesyncexternalstore` - 

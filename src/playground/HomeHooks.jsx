@@ -105,7 +105,7 @@ const HomeHooks = () => {
       description: 'Permite personalizar el identificador expuesto como una ref.',
       category: 'Referencias',
       route: '/playground/useimperativehandle',
-      implemented: false
+      implemented: true
     },
     {
       name: 'useInsertionEffect',
