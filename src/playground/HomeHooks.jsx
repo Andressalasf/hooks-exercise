@@ -85,6 +85,48 @@ const HomeHooks = () => {
       category: 'Performance',
       route: '/playground/usetransition',
       implemented: true
+    },
+    {
+      name: 'useActionState',
+      description: 'Actualiza el estado basándose en el resultado de una acción de formulario.',
+      category: 'Estado / Librerias',
+      route: '/playground/useactionstate',
+      implemented: true
+    },
+    {
+      name: 'useEffectEvent',
+      description: 'Ejecuta efectos secundarios basado en eventos específicos.',
+      category: 'Efectos / ciclo de vida',
+      route: '/playground/useeffectevent',
+      implemented: false
+    },
+    {
+      name: 'useImperativeHandle',
+      description: 'Permite personalizar el identificador expuesto como una ref.',
+      category: 'Referencias',
+      route: '/playground/useimperativehandle',
+      implemented: false
+    },
+    {
+      name: 'useInsertionEffect',
+      description: 'Inserta elementos en el DOM antes de que se dispare cualquier Efecto de diseño.',
+      category: 'Efectos / ciclo de vida',
+      route: '/playground/useinsertioneffect',
+      implemented: false
+    },
+    {
+      name: 'useOptimistic',
+      description: 'Actualiza la interfaz de usuario / UI de manera optimista.',
+      category: 'Estado',
+      route: '/playground/useoptimistic',
+      implemented: false
+    },
+    {
+      name: 'useSyncExternalStore',
+      description: 'Permite suscribirse a una fuente de almacenamiento de datos (store) externa.',
+      category: 'Contexto y datos externos',
+      route: '/playground/usesyncexternalstore',
+      implemented: false
     }
   ];
 

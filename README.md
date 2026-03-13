@@ -6,6 +6,7 @@
 |----------------|--------|-----------------|
 | Andrés Felipe Salas Niño | AFSN | useState, useEffect, useContext, useReducer, useRef, useMemo |
 | Javier Andres Quintero Clavijo | JAQC | useCallback, useDebugValue, useId, useDeferredValue, useLayoutEffect, useTransition |
+| Andrey Castilla Contreras | ACC | useActionState, useEffectEvent, useImperativeHandle, useInsertionEffect, useOptimistic, useSyncExternalStore |
 
 ---
 
@@ -25,6 +26,12 @@
 | **useDeferredValue** | Difiere la actualización de un valor no urgente para mantener la interfaz responsiva. | Performance |
 | **useLayoutEffect** | Ejecuta efectos síncronamente tras las mutaciones del DOM, antes de que el navegador pinte. | Efectos / ciclo de vida |
 | **useTransition** | Marca actualizaciones de estado como no urgentes para priorizar interacciones del usuario. | Performance |
+| **useActionState** | Actualiza el estado basándose en el resultado de una acción de formulario. | Estado / Librerias |
+| **useEffectEvent** | Ejecuta efectos secundarios basado en eventos específicos. | Efectos / ciclo de vida |
+| **useImperativeHandle** | Permite personalizar el identificador expuesto como una ref. | Referencias |
+| **useInsertionEffect** |  Inserta elementos en el DOM antes de que se dispare cualquier Efecto de diseño. | Efectos / ciclo de vida |
+| **useOptimistic** | Actualiza la interfaz de usuario / UI de manera optimista. | Estado |
+| **useSyncExternalStore** | Permite suscribirse a una fuente de almacenamiento de datos (store) externa. | Contexto y datos externos |
 
 ---
 
@@ -414,6 +421,37 @@ Un panel con cuatro pestañas (Ventas, Clientes, Productos, Reportes), cada una 
 
 ---
 
+## Ejercicio 13: useActionState
+
+### Descripción del Hook
+`useActionState` permite actualizar el estado basado en el resultado de una acción de formulario.
+
+```javascript
+const [state, dispatchAction, isPending] = useActionState(reducerAction, initialState, permalink?);
+```
+
+Donde:
+- `state`: valor actual del estado.
+- `dispatchAction`: una función llamada dentro de las acciones.
+- `isPending`: bandera que permite saber si se tienen acciones pendientes
+
+### Ejercicio Desarrollado: Carrito con cola en el boton de agregar
+
+El carrito más simple posible, tiene la cantidad de productos que aumentan al presionar el botón de agregar, dicho botón permite encadenar acciones (agregar producto) si se presiona en menos de un segundo, terminado el tiempo de espera se actualiza el valor total.
+
+#### Valores retornados:
+
+1. **count**: estado que guarda la cantidad de veces que se presiono el botón de agregar
+2. **dispatchAction(funcion)**: captura la cadena de acciones para modificar el estado
+3. **isPending**: su valor es `true` hasta que se deja de presionar el botón por medio segundo
+
+#### Funcionalidades Implementadas:
+
+- **Agregar**: agrega productos al total, recibiendo entrada de click hasta que se deje de presionar por medio segundo, dicha funcionalidad mostrada por un icono
+- **Total**: valor total calculado luego de dejar de presionar el botón anterior
+
+---
+
 ## Estructura del Proyecto
 
 ```
@@ -431,7 +469,13 @@ src/
     ├── UseIdExample.jsx                  # Ejercicio de useId
     ├── UseDeferredValueExample.jsx       # Ejercicio de useDeferredValue
     ├── UseLayoutEffectExample.jsx        # Ejercicio de useLayoutEffect
-    └── UseTransitionExample.jsx          # Ejercicio de useTransition
+    ├── UseTransitionExample.jsx          # Ejercicio de useTransition
+    ├── UseActionStateExample.jsx         # Ejercicio de useActionState
+    ├── UseEffectEventExample.jsx         # Ejercicio de useEffectEvent
+    ├── UseImperativeHandleExample.jsx    # Ejercicio de useImperativeHandle
+    ├── UseInsertioneffectExample.jsx     # Ejercicio de useInsertioneffect
+    ├── UseOptimisticExample.jsx          # Ejercicio de useOptimistic
+    └── UseSyncExternalStoreExample.jsx   # Ejercicio de useSyncExternalStore
 ```
 
 ---
@@ -451,6 +495,12 @@ src/
 - **useDeferredValue**: `/playground/usedeferredvalue` - Buscador de productos con lista diferida
 - **useLayoutEffect**: `/playground/uselayouteffect` - Catálogo con indicador de pestaña animado
 - **useTransition**: `/playground/usetransition` - Panel de datos por módulo con transición no urgente
+- **useActionState**: `/playgrond/useactionstate` - Carrito de compra con actualización de valor al final
+- **useEffectEvent**: `/playground/useeffectevent` - 
+- **useImperativeHandle**: `/playground/useimperativehandle` - 
+- **useInsertionEffect**: `/playground/useinsertioneffect` - 
+- **useOptimistic**: `/playground/useoptimistic` - 
+- **useSyncExternalStore**: `/playground/usesyncexternalstore` - 
 
 ---
 
