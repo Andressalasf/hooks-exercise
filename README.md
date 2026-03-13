@@ -452,6 +452,37 @@ El carrito más simple posible, tiene la cantidad de productos que aumentan al p
 
 ---
 
+## Ejercicio 14: useEffectEvent
+
+### Descripción del Hook
+`useEffectEvent` permite separar efectos de eventos, es decir permite refrescar valores en la llamada a un efecto sin que estos causen el mismo a correr de nuevo.
+
+```javascript
+const onEvent = useEffectEvent(callback);
+```
+
+Donde:
+- `callback`: función conteniendo la lógica del evento de efecto, cuando es llamada siempre accede los ultimos valores del render al momento de llamado
+
+### Ejercicio Desarrollado: Temporizador con los valores de intervalo mas recientes dados
+
+Un temporizador cuyo intervalo de conteo es modificable sin reiniciar completamente el mismo
+
+#### Valores retornados:
+
+1. **count**: el conteo actual del temporizador
+2. **incremento**: el valor de incremento del contador por segundo
+
+#### Funcionalidades Implementadas:
+
+- **Contador**: valor actual del temporizador
+- **Reset**: reinicia el temporizador a cero
+- **-**: reduce el incremento por segundo
+- **+**: aumenta el incremento por segundo
+- **valor**: el valor de incremento por segundo, si es cero el temporizador para
+
+---
+
 ## Estructura del Proyecto
 
 ```
@@ -496,7 +527,7 @@ src/
 - **useLayoutEffect**: `/playground/uselayouteffect` - Catálogo con indicador de pestaña animado
 - **useTransition**: `/playground/usetransition` - Panel de datos por módulo con transición no urgente
 - **useActionState**: `/playgrond/useactionstate` - Carrito de compra con actualización de valor al final
-- **useEffectEvent**: `/playground/useeffectevent` - 
+- **useEffectEvent**: `/playground/useeffectevent` - Temporizador con los valores de intervalo mas recientes dados
 - **useImperativeHandle**: `/playground/useimperativehandle` - 
 - **useInsertionEffect**: `/playground/useinsertioneffect` - 
 - **useOptimistic**: `/playground/useoptimistic` - 
