@@ -17,6 +17,7 @@ import UseEffectEventExample from './playground/UseEffectEventExample';
 import UseImperativeHandleExample from './playground/UseImperativeHandleExample';
 import UseInsertionEffectExample from './playground/UseInsertionEffectExample';
 import UseOptimisticExample from './playground/UseOptimisticExample';
+import UseSyncExternalStoreExample from './playground/UseSyncExternalStoreExample';
 import './App.css';
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
         <Route path="/playground/useimperativehandle" element={<UseImperativeHandleExample />} />
         <Route path="/playground/useinsertioneffect" element={<UseInsertionEffectExample />} />
         <Route path="/playground/useoptimistic" element={<UseOptimisticExample />} />
+        <Route path="/playground/usesyncexternalstore" element={<UseSyncExternalStoreExample />} />
       </Routes>
     </Router>
   );

@@ -571,6 +571,37 @@ mientras son almacenados indicando esta acción
 -**Enviar Mensaje**: realiza la operacion de enviar los datos, esparando a EntregarMensaje
 
 ---
+
+## Ejercicio 18: useSyncExternalStore
+
+### Descripción del Hook
+`useSyncExternalStore` permite suscribirte a una fuente de almacenamiento de datos (store) externa.
+
+```javascript
+const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot?);
+```
+
+Donde:
+- **subscribe**: función de un argumento (`callback`) que lo toma y lo suscribe a la fuente de almacenamiento de datos
+- **getSnapshot**: función que devuelve una instantánea de los datos de la fuente de almacenamiento
+- **getServerSnapshot**: opcional, función que devuelve una instantánea inicial de los datos de la fuente de almacenamiento, solo para usarse durante el renderizado en el servidor
+
+### Ejercicio Desarrollado: Listado dinámico almacenado en fuente de datos externa
+
+Se creo una lista sincronizada con una fuente de almacenmiento externa simulada en **todoStore.js**, `useSyncExternalStore` se encarga de asegurase que sea posible usarla y manteniene una imagen del listado.
+
+#### Valores retornados:
+
+1. **snaphot**: instantánea actual de la fuente de almacenamiento para uso en la lógica de renderizado
+2. **subscribe return**: `subscribe` debe devolver una función para limpiar la suscripción
+
+#### Funcionalidades Implementadas:
+
+- **Almacenamiento externo**: se almacenaron los datos en una fuente externa de almacenamiento
+- **Verificación**: se aseguro que la conexión con la fuente externa fuera valida y usable
+- **Visualización**: se visualiza el listado tomado de la fuente externa de forma dinamica
+
+---
 ## Estructura del Proyecto
 
 ```
@@ -619,7 +650,7 @@ src/
 - **useImperativeHandle**: `/playground/useimperativehandle` - Realizar acciones en una casilla de texto desde un nivel superior
 - **useInsertionEffect**: `/playground/useinsertioneffect` - Cambio de tema / inserción de CSS antes de carga del DOM
 - **useOptimistic**: `/playground/useoptimistic` - Actualización optimista de lista en formulario
-- **useSyncExternalStore**: `/playground/usesyncexternalstore` - 
+- **useSyncExternalStore**: `/playground/usesyncexternalstore` - Listado dinámico almacenado en fuente de datos externa
 
 ---
 
