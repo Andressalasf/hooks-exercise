@@ -112,7 +112,7 @@ const HomeHooks = () => {
       description: 'Inserta elementos en el DOM antes de que se dispare cualquier Efecto de diseño.',
       category: 'Efectos / ciclo de vida',
       route: '/playground/useinsertioneffect',
-      implemented: false
+      implemented: true
     },
     {
       name: 'useOptimistic',

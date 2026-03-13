@@ -513,6 +513,33 @@ y se demostró que se pueden realizar acciones desde un nivel superior usando es
 - **Limpiar entrada**: se limpia la entrada de texto usando `inputRef`
 
 ---
+
+## Ejercicio 16: useInsertionEffect
+
+### Descripción del Hook
+`useInsertionEffect` permite insertar elementos en el DOM antes de que se dispare cualquier Efecto de diseño (layout).
+
+```javascript
+useInsertionEffect(setup, dependencies?);
+```
+
+Donde:
+- `setup`: función conteniendo la lógica de los efectos
+- `dependicies`: opcional, lista de los valores reactivos referenciados en el código de `setup`
+
+### Ejercicio Desarrollado: Cambio de tema / inserción de CSS antes de carga del DOM
+
+Un ejemplo de carga de CSS previo al resto del DOM, manteniendo en su medida el rendimiento y evitando posibles problemas de parpadeo.
+
+#### Valores retornados:
+
+1. **setup**: función encargarda de insertar el CSS dependiendo del estado
+
+#### Funcionalidades Implementadas:
+
+- **Cambiar a Tema**: cambia el estado de `tema` para que sea aplicado al elemento de demostración
+
+---
 ## Estructura del Proyecto
 
 ```
@@ -559,7 +586,7 @@ src/
 - **useActionState**: `/playgrond/useactionstate` - Carrito de compra con actualización de valor al final
 - **useEffectEvent**: `/playground/useeffectevent` - Temporizador con los valores de intervalo mas recientes dados
 - **useImperativeHandle**: `/playground/useimperativehandle` - Realizar acciones en una casilla de texto desde un nivel superior
-- **useInsertionEffect**: `/playground/useinsertioneffect` - 
+- **useInsertionEffect**: `/playground/useinsertioneffect` - Cambio de tema / inserción de CSS antes de carga del DOM
 - **useOptimistic**: `/playground/useoptimistic` - 
 - **useSyncExternalStore**: `/playground/usesyncexternalstore` - 
 

@@ -15,6 +15,7 @@ import UseTransitionExample from './playground/UseTransitionExample';
 import UseActionStateExample from './playground/UseActionStateExample';
 import UseEffectEventExample from './playground/UseEffectEventExample';
 import UseImperativeHandleExample from './playground/UseImperativeHandleExample';
+import UseInsertionEffectExample from './playground/UseInsertionEffectExample';
 import './App.css';
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
         <Route path="/playground/useactionstate" element={<UseActionStateExample />} />
         <Route path="/playground/useeffectevent" element={<UseEffectEventExample />} />
         <Route path="/playground/useimperativehandle" element={<UseImperativeHandleExample />} />
+        <Route path="/playground/useinsertioneffect" element={<UseInsertionEffectExample />} />
       </Routes>
     </Router>
   );
