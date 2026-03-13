@@ -12,6 +12,7 @@ import UseIdExample from './playground/UseIdExample';
 import UseDeferredValueExample from './playground/UseDeferredValueExample';
 import UseLayoutEffectExample from './playground/UseLayoutEffectExample';
 import UseTransitionExample from './playground/UseTransitionExample';
+import UseActionStateExample from './playground/UseActionStateExample';
 import './App.css';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
         <Route path="/playground/usedeferredvalue" element={<UseDeferredValueExample />} />
         <Route path="/playground/uselayouteffect" element={<UseLayoutEffectExample />} />
         <Route path="/playground/usetransition" element={<UseTransitionExample />} />
+        <Route path="/playground/useactionstate" element={<UseActionStateExample />} />
       </Routes>
     </Router>
   );
