@@ -1,35 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import HomeHooks from './playground/HomeHooks';
+import UseStateExample from './playground/UseStateExample';
+import UseEffectExample from './playground/UseEffectExample';
+import UseContextExample from './playground/UseContextExample';
+import UseReducerExample from './playground/UseReducerExample';
+import UseRefExample from './playground/UseRefExample';
+import UseMemoExample from './playground/UseMemoExample';
+import UseCallbackExample from './playground/UseCallbackExample';
+import UseDebugValueExample from './playground/UseDebugValueExample';
+import UseIdExample from './playground/UseIdExample';
+import UseDeferredValueExample from './playground/UseDeferredValueExample';
+import UseLayoutEffectExample from './playground/UseLayoutEffectExample';
+import UseTransitionExample from './playground/UseTransitionExample';
+import UseActionStateExample from './playground/UseActionStateExample';
+import UseEffectEventExample from './playground/UseEffectEventExample';
+import UseImperativeHandleExample from './playground/UseImperativeHandleExample';
+import UseInsertionEffectExample from './playground/UseInsertionEffectExample';
+import UseOptimisticExample from './playground/UseOptimisticExample';
+import UseSyncExternalStoreExample from './playground/UseSyncExternalStoreExample';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Routes>
+        //Rutas
+        <Route path="/" element={<Navigate to="/playground" replace />} />
+        <Route path="/playground" element={<HomeHooks />} />
+        <Route path="/playground/usestate" element={<UseStateExample />} />
+        <Route path="/playground/useeffect" element={<UseEffectExample />} />
+        <Route path="/playground/usecontext" element={<UseContextExample />} />
+        <Route path="/playground/usereducer" element={<UseReducerExample />} />
+        <Route path="/playground/useref" element={<UseRefExample />} />
+        <Route path="/playground/usememo" element={<UseMemoExample />} />
+        <Route path="/playground/usecallback" element={<UseCallbackExample />} />
+        <Route path="/playground/usedebugvalue" element={<UseDebugValueExample />} />
+        <Route path="/playground/useid" element={<UseIdExample />} />
+        <Route path="/playground/usedeferredvalue" element={<UseDeferredValueExample />} />
+        <Route path="/playground/uselayouteffect" element={<UseLayoutEffectExample />} />
+        <Route path="/playground/usetransition" element={<UseTransitionExample />} />
+        <Route path="/playground/useactionstate" element={<UseActionStateExample />} />
+        <Route path="/playground/useeffectevent" element={<UseEffectEventExample />} />
+        <Route path="/playground/useimperativehandle" element={<UseImperativeHandleExample />} />
+        <Route path="/playground/useinsertioneffect" element={<UseInsertionEffectExample />} />
+        <Route path="/playground/useoptimistic" element={<UseOptimisticExample />} />
+        <Route path="/playground/usesyncexternalstore" element={<UseSyncExternalStoreExample />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
