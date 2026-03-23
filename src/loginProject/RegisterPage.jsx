@@ -1,6 +1,24 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const RegisterPage = () => {
+  const [formData, setFormData] = useState({
+    nombre: '',
+    apellido: '',
+    codigo: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-200">
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-slate-50/95 backdrop-blur">
@@ -55,8 +73,11 @@ const RegisterPage = () => {
                   </label>
                   <input
                     id="nombre"
+                    name="nombre"
                     type="text"
                     placeholder="Tu nombre"
+                    value={formData.nombre}
+                    onChange={handleInputChange}
                     className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
                   />
                 </div>
@@ -67,8 +88,11 @@ const RegisterPage = () => {
                   </label>
                   <input
                     id="apellido"
+                    name="apellido"
                     type="text"
                     placeholder="Tu apellido"
+                    value={formData.apellido}
+                    onChange={handleInputChange}
                     className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
                   />
                 </div>
@@ -80,8 +104,11 @@ const RegisterPage = () => {
                 </label>
                 <input
                   id="codigo"
+                  name="codigo"
                   type="text"
                   placeholder="Ej: 191000"
+                  value={formData.codigo}
+                  onChange={handleInputChange}
                   className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
                 />
               </div>
@@ -92,8 +119,11 @@ const RegisterPage = () => {
                 </label>
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="correo@ejemplo.com"
+                  value={formData.email}
+                  onChange={handleInputChange}
                   className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
                 />
               </div>
@@ -105,8 +135,11 @@ const RegisterPage = () => {
                   </label>
                   <input
                     id="password"
+                    name="password"
                     type="password"
                     placeholder="********"
+                    value={formData.password}
+                    onChange={handleInputChange}
                     className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
                   />
                 </div>
@@ -120,8 +153,11 @@ const RegisterPage = () => {
                   </label>
                   <input
                     id="confirmPassword"
+                    name="confirmPassword"
                     type="password"
                     placeholder="********"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
                     className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
                   />
                 </div>
