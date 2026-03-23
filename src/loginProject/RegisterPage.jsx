@@ -10,6 +10,55 @@ const RegisterPage = () => {
     password: '',
     confirmPassword: ''
   });
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    const specialCharacterRegex = /[^A-Za-z0-9]/;
+
+    if (!formData.nombre.trim()) {
+      newErrors.nombre = 'El nombre es obligatorio.';
+    } else if (formData.nombre.trim().length > 50) {
+      newErrors.nombre = 'El nombre debe tener maximo 50 caracteres.';
+    }
+
+    if (!formData.apellido.trim()) {
+      newErrors.apellido = 'El apellido es obligatorio.';
+    } else if (formData.apellido.trim().length > 50) {
+      newErrors.apellido = 'El apellido debe tener maximo 50 caracteres.';
+    }
+
+    if (!formData.codigo.trim()) {
+      newErrors.codigo = 'El codigo es obligatorio.';
+    } else if (formData.codigo.trim().length > 6) {
+      newErrors.codigo = 'El codigo debe tener maximo 6 caracteres.';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'El correo electronico es obligatorio.';
+    } else if (formData.email.trim().length > 254) {
+      newErrors.email = 'El correo electronico debe tener maximo 254 caracteres.';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Ingresa un correo electronico valido.';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'La contrasena es obligatoria.';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'La contrasena debe tener minimo 6 caracteres.';
+    } else if (!specialCharacterRegex.test(formData.password)) {
+      newErrors.password = 'La contrasena debe incluir al menos un caracter especial.';
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'La confirmacion de contrasena es obligatoria.';
+    } else if (formData.confirmPassword !== formData.password) {
+      newErrors.confirmPassword = 'Las contrasenas no coinciden.';
+    }
+
+    return newErrors;
+  };
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -17,6 +66,22 @@ const RegisterPage = () => {
       ...prevData,
       [name]: value
     }));
+
+    setErrors((prevErrors) => {
+      if (!prevErrors[name]) {
+        return prevErrors;
+      }
+
+      const updatedErrors = { ...prevErrors };
+      delete updatedErrors[name];
+      return updatedErrors;
+    });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
   };
 
   return (
@@ -65,7 +130,7 @@ const RegisterPage = () => {
               <p className="mt-1 text-sm text-slate-600">Completa los datos para registrarte.</p>
             </div>
 
-            <form className="space-y-5">
+            <form className="space-y-5" onSubmit={handleSubmit} noValidate>
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div className="space-y-2">
                   <label htmlFor="nombre" className="ml-1 block font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-slate-600">
@@ -75,11 +140,15 @@ const RegisterPage = () => {
                     id="nombre"
                     name="nombre"
                     type="text"
+                    maxLength={50}
                     placeholder="Tu nombre"
                     value={formData.nombre}
                     onChange={handleInputChange}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
+                    className={`w-full rounded-lg border bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:bg-white ${
+                      errors.nombre ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-400'
+                    }`}
                   />
+                  {errors.nombre && <p className="ml-1 text-xs font-medium text-red-600">{errors.nombre}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -90,11 +159,15 @@ const RegisterPage = () => {
                     id="apellido"
                     name="apellido"
                     type="text"
+                    maxLength={50}
                     placeholder="Tu apellido"
                     value={formData.apellido}
                     onChange={handleInputChange}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
+                    className={`w-full rounded-lg border bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:bg-white ${
+                      errors.apellido ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-400'
+                    }`}
                   />
+                  {errors.apellido && <p className="ml-1 text-xs font-medium text-red-600">{errors.apellido}</p>}
                 </div>
               </div>
 
@@ -106,11 +179,15 @@ const RegisterPage = () => {
                   id="codigo"
                   name="codigo"
                   type="text"
+                  maxLength={6}
                   placeholder="Ej: 191000"
                   value={formData.codigo}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
+                  className={`w-full rounded-lg border bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:bg-white ${
+                    errors.codigo ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-400'
+                  }`}
                 />
+                {errors.codigo && <p className="ml-1 text-xs font-medium text-red-600">{errors.codigo}</p>}
               </div>
 
               <div className="space-y-2">
@@ -121,11 +198,15 @@ const RegisterPage = () => {
                   id="email"
                   name="email"
                   type="email"
+                  maxLength={254}
                   placeholder="correo@ejemplo.com"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
+                  className={`w-full rounded-lg border bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:bg-white ${
+                    errors.email ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-400'
+                  }`}
                 />
+                {errors.email && <p className="ml-1 text-xs font-medium text-red-600">{errors.email}</p>}
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -140,8 +221,11 @@ const RegisterPage = () => {
                     placeholder="********"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
+                    className={`w-full rounded-lg border bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:bg-white ${
+                      errors.password ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-400'
+                    }`}
                   />
+                  {errors.password && <p className="ml-1 text-xs font-medium text-red-600">{errors.password}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -158,8 +242,13 @@ const RegisterPage = () => {
                     placeholder="********"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white"
+                    className={`w-full rounded-lg border bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:bg-white ${
+                      errors.confirmPassword ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-400'
+                    }`}
                   />
+                  {errors.confirmPassword && (
+                    <p className="ml-1 text-xs font-medium text-red-600">{errors.confirmPassword}</p>
+                  )}
                 </div>
               </div>
 
