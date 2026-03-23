@@ -11,6 +11,7 @@ const RegisterPage = () => {
     confirmPassword: ''
   });
   const [errors, setErrors] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -82,6 +83,12 @@ const RegisterPage = () => {
     event.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length === 0) {
+      setIsModalOpen(true);
+    } else {
+      setIsModalOpen(false);
+    }
   };
 
   return (
@@ -115,7 +122,7 @@ const RegisterPage = () => {
               <span className="text-blue-700">linea por linea.</span>
             </h1>
             <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600 md:text-lg">
-              Registra tu cuenta para acceder a tus ejercicios y seguir practicando tu logica de programacion de manera
+              Registra tu cuenta para acceder a tus ejercicios y seguir practicando tu logica de programación de manera
               organizada.
             </p>
           </div>
@@ -173,7 +180,7 @@ const RegisterPage = () => {
 
               <div className="space-y-2">
                 <label htmlFor="codigo" className="ml-1 block font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-slate-600">
-                  Codigo
+                  Código
                 </label>
                 <input
                   id="codigo"
@@ -192,7 +199,7 @@ const RegisterPage = () => {
 
               <div className="space-y-2">
                 <label htmlFor="email" className="ml-1 block font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-slate-600">
-                  Correo electronico
+                  Correo electrónico
                 </label>
                 <input
                   id="email"
@@ -212,7 +219,7 @@ const RegisterPage = () => {
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div className="space-y-2">
                   <label htmlFor="password" className="ml-1 block font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-slate-600">
-                    Contrasena
+                    Contraseña
                   </label>
                   <input
                     id="password"
@@ -233,7 +240,7 @@ const RegisterPage = () => {
                     htmlFor="confirmPassword"
                     className="ml-1 block font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-slate-600"
                   >
-                    Confirmar contrasena
+                    Confirmar contraseña
                   </label>
                   <input
                     id="confirmPassword"
@@ -263,12 +270,42 @@ const RegisterPage = () => {
             <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-5 text-sm text-slate-600 md:flex-row">
               <p>Ya tienes cuenta?</p>
               <Link to="/login" className="font-semibold text-blue-700 hover:underline">
-                Ir a inicio de sesion
+                Ir a inicio de sesión
               </Link>
             </div>
           </div>
         </section>
       </main>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/45 px-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-7 shadow-2xl md:p-8">
+            <div className="mb-5 border-b border-slate-200 pb-4">
+              <h3 className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight text-slate-900">Datos registrados</h3>
+              <p className="mt-1 text-sm text-slate-600">Formulario válido.</p>
+            </div>
+
+            <div className="space-y-3 text-sm text-slate-700">
+              <p><span className="font-semibold text-slate-900">Nombre:</span> {formData.nombre}</p>
+              <p><span className="font-semibold text-slate-900">Apellido:</span> {formData.apellido}</p>
+              <p><span className="font-semibold text-slate-900">Codigo:</span> {formData.codigo}</p>
+              <p><span className="font-semibold text-slate-900">Correo electronico:</span> {formData.email}</p>
+              <p><span className="font-semibold text-slate-900">Contraseña:</span> {formData.password}</p>
+              <p><span className="font-semibold text-slate-900">Confirmar contraseña:</span> {formData.confirmPassword}</p>
+            </div>
+
+            <div className="mt-7 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="rounded-lg bg-blue-700 px-5 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-white transition hover:bg-blue-800"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
