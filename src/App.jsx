@@ -19,39 +19,15 @@ import UseInsertionEffectExample from './playground/UseInsertionEffectExample';
 import UseOptimisticExample from './playground/UseOptimisticExample';
 import UseSyncExternalStoreExample from './playground/UseSyncExternalStoreExample';
 import RegisterPage from './loginProject/RegisterPage';
+import LoginPage from './loginProject/LoginPage';
 import './App.css';
-
-const LoginPagePlaceholder = () => {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
-      <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-        <h1 className="font-['Space_Grotesk'] text-3xl font-bold tracking-tight text-slate-900">LoginPage pendiente</h1>
-        <p className="mt-3 text-slate-600">La ruta principal ahora es LoginPage. Esta vista se implementara en el siguiente paso.</p>
-        <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            to="/register"
-            className="rounded-lg bg-blue-700 px-5 py-3 font-['Space_Grotesk'] text-sm font-semibold text-white transition hover:bg-blue-800"
-          >
-            Ir a registro
-          </Link>
-          <Link
-            to="/playground"
-            className="rounded-lg border border-slate-300 px-5 py-3 font-['Space_Grotesk'] text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-          >
-            Ir a Home Hooks
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPagePlaceholder />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/playground" element={<HomeHooks />} />
         <Route path="/playground/usestate" element={<UseStateExample />} />
