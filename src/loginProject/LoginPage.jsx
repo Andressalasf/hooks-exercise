@@ -26,9 +26,35 @@ const LoginPage = () => {
     });
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'El correo electronico es obligatorio.';
+    } else if (formData.email.trim().length > 254) {
+      newErrors.email = 'El correo electronico debe tener maximo 254 caracteres.';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Ingresa un correo electronico valido.';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'La contrasena es obligatoria.';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'La contrasena debe tener minimo 6 caracteres.';
+    }
+
+    return newErrors;
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    navigate('/dashboard');
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length === 0) {
+      navigate('/dashboard');
+    }
   };
 
   return (
