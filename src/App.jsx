@@ -20,6 +20,7 @@ import UseOptimisticExample from './playground/UseOptimisticExample';
 import UseSyncExternalStoreExample from './playground/UseSyncExternalStoreExample';
 import RegisterPage from './loginProject/RegisterPage';
 import LoginPage from './loginProject/LoginPage';
+import DashboardPage from './loginProject/DashboardPage';
 import './App.css';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/playground" element={<HomeHooks />} />
         <Route path="/playground/usestate" element={<UseStateExample />} />
