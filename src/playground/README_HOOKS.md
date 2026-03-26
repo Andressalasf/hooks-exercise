@@ -670,4 +670,3 @@ npm run dev
 3. Abrir en el navegador: `http://localhost:5173`
 
 ---
-
