@@ -1,7 +1,18 @@
-import { useState } from 'react';
+import { useState, useNavigate } from 'react';
 import { Link } from 'react-router-dom';
 
 const RecoverPage = () => {
+
+    const [formData, setFormData] = useState({
+        email: '',
+    });
+    const handleInputChange = (event) => {
+        const { name, value } = event.target;
+        setFormData((prevData) => ({
+            ...prevData,
+        [name]: value,
+    }));
+    };
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-200">
             <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-slate-50/95 backdrop-blur">
@@ -43,6 +54,8 @@ const RecoverPage = () => {
                                     name="email"
                                     type="email"
                                     placeholder="correo@ejemplo.com"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
                                     className={`w-full rounded-lg border bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:bg-white`}
                                 />
                             </div>
