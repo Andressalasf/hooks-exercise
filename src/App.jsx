@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import HomeHooks from './playground/HomeHooks';
 import UseStateExample from './playground/UseStateExample';
 import UseEffectExample from './playground/UseEffectExample';
@@ -18,14 +18,23 @@ import UseImperativeHandleExample from './playground/UseImperativeHandleExample'
 import UseInsertionEffectExample from './playground/UseInsertionEffectExample';
 import UseOptimisticExample from './playground/UseOptimisticExample';
 import UseSyncExternalStoreExample from './playground/UseSyncExternalStoreExample';
+import RegisterPage from './loginProject/RegisterPage';
+import LoginPage from './loginProject/LoginPage';
+import DashboardPage from './loginProject/DashboardPage';
+import RecoverPage from './loginProject/RecoverPage';
+import ResetPage from './loginProject/ResetPage';
 import './App.css';
 
 function App() {
   return (
     <Router>
       <Routes>
-        //Rutas
-        <Route path="/" element={<Navigate to="/playground" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/recover" element={<RecoverPage />} />
+        <Route path="/reset" element={<ResetPage />} />
         <Route path="/playground" element={<HomeHooks />} />
         <Route path="/playground/usestate" element={<UseStateExample />} />
         <Route path="/playground/useeffect" element={<UseEffectExample />} />

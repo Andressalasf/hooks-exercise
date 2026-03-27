@@ -133,8 +133,14 @@ const HomeHooks = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="bg-blue-600 text-white p-4 mb-6">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h1 className="text-2xl font-bold">Práctica de React Hooks</h1>
+          <Link
+            to="/register"
+            className="inline-block bg-white text-blue-700 hover:bg-blue-50 px-4 py-2 rounded text-sm font-semibold"
+          >
+            Ir a RegisterPage
+          </Link>
         </div>
       </div>
 
