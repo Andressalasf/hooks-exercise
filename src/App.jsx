@@ -22,6 +22,7 @@ import RegisterPage from './loginProject/RegisterPage';
 import LoginPage from './loginProject/LoginPage';
 import DashboardPage from './loginProject/DashboardPage';
 import RecoverPage from './loginProject/RecoverPage';
+import ResetPage from './loginProject/ResetPage';
 import './App.css';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/recover" element={<RecoverPage />} />
+        <Route path="/reset" element={<ResetPage />} />
         <Route path="/playground" element={<HomeHooks />} />
         <Route path="/playground/usestate" element={<UseStateExample />} />
         <Route path="/playground/useeffect" element={<UseEffectExample />} />
