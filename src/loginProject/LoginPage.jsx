@@ -28,7 +28,7 @@ const LoginPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    const emailRegex = /^[^\s@]{4,}@[^\s@]+\.[^\s@]{2,}$/;
 
     if (!formData.email.trim()) {
       newErrors.email = 'El correo electronico es obligatorio.';
