@@ -62,6 +62,20 @@ Asi funciona:
 
 Lo que se realizo en esta pagina fue dejar la base funcional del flujo de inicio de sesion: estructura visual, control de campos con React, validaciones iniciales, retroalimentacion al usuario y navegacion hacia el dashboard.
 
+## Funcionamiento de RecoverPage
+**Responsable:** Andrey Castilla Contreras
+
+La pagina de recuperación de contraseña se hizo para que un usuario registrado pueda solicitarla facilmente por correo y con retroalimentacion clara en cada campo.
+
+Asi funciona:
+- El usuario ingresa su correo electronico en el formulario.
+- La pagina guarda el dato con estado de React para controlar lo que se escribe en el campo.
+- Se revisan validaciones basicas al intentar enviar el formulario.
+- Si hay errores, se muestran mensajes debajo de cada campo para que el usuario sepa que debe corregir.
+- Si todo esta correcto, se crea una ventana modal informando del exito de la operación al usuario.
+
+Lo que se realizo en esta pagina fue dejar la base funcional del flujo de inicio de sesion: estructura visual, control de campos con React, validaciones iniciales, retroalimentacion al usuario.
+
 ## Estructura del proyecto
 La estructura principal del repositorio es la siguiente:
 
@@ -73,6 +87,7 @@ hooks_exercise/
 |   |-- loginProject/
 |   |   |-- DashboardPage.jsx
 |   |   |-- LoginPage.jsx
+|   |   |-- RecoverPage.jsx
 |   |   `-- RegisterPage.jsx
 |   |-- playground/
 |   |   |-- HomeHooks.jsx
