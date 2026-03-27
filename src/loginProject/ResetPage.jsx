@@ -78,7 +78,7 @@ const ResetPage = () => {
                 <div className="w-full max-w-[440px]">
                     <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-[0_20px_50px_rgba(15,23,42,0.08)] md:p-10">
                         <div className="mb-7">
-                            <h2 className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight">Recuperar tu contraseña</h2>
+                            <h2 className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight">Cambiar tu contraseña</h2>
                             <p className="mt-1 text-sm text-slate-600">Ingresa tu contraseña actual y luego la nueva.</p>
                         </div>
                         <form className="space-y-5" onSubmit={handleSubmit} noValidate>
