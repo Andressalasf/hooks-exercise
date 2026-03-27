@@ -47,6 +47,21 @@ Asi funciona:
 
 Lo que se realizo en esta pagina fue dejar la base funcional del flujo de registro: estructura visual, control de campos, validaciones iniciales y retroalimentacion al usuario.
 
+## Funcionamiento de LoginPage
+**Responsable:** Javier Andres Quintero Clavijo
+
+La pagina de inicio de sesion se hizo para que un usuario registrado pueda acceder a su cuenta de forma sencilla y con retroalimentacion clara en cada campo.
+
+Asi funciona:
+- El usuario ingresa su correo electronico y su contrasena en el formulario.
+- La pagina guarda esos datos con estado de React para controlar lo que se escribe en cada campo.
+- Hay un boton para mostrar u ocultar la contrasena mientras se escribe, para evitar errores al ingresar.
+- Se revisan validaciones basicas al intentar enviar el formulario.
+- Si hay errores, se muestran mensajes debajo de cada campo para que el usuario sepa que debe corregir.
+- Si todo esta correcto, se redirige al usuario a la pagina de Dashboard.
+
+Lo que se realizo en esta pagina fue dejar la base funcional del flujo de inicio de sesion: estructura visual, control de campos con React, validaciones iniciales, retroalimentacion al usuario y navegacion hacia el dashboard.
+
 ## Estructura del proyecto
 La estructura principal del repositorio es la siguiente:
 
