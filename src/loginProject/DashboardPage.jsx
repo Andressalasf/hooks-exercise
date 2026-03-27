@@ -20,6 +20,12 @@ const DashboardPage = () => {
             Volver al login
           </Link>
           <Link
+            to="/reset"
+            className="rounded-lg border border-slate-200 px-5 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            Cambiar contraseña
+          </Link>
+          <Link
             to="/playground"
             className="rounded-lg bg-blue-500 px-5 py-2.5 font-['Space_Grotesk'] text-sm font-bold text-white transition hover:brightness-110"
           >
