@@ -1,4 +1,4 @@
-import { useState, useNavigate } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const RecoverPage = () => {
@@ -6,12 +6,47 @@ const RecoverPage = () => {
     const [formData, setFormData] = useState({
         email: '',
     });
+    const [errors, setErrors] = useState({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setFormData((prevData) => ({
             ...prevData,
         [name]: value,
-    }));
+        }));
+        setErrors((prevErrors) => {
+            if (!prevErrors[name]) return prevErrors;
+            const updated = { ...prevErrors };
+            delete updated[name];
+            return updated;
+        });
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        const emailRegex = /^[^\s@]{4,}@[^\s@]+\.[^\s@]{2,}$/;
+
+        if (!formData.email.trim()) {
+        newErrors.email = 'El correo electronico es obligatorio.';
+        } else if (formData.email.trim().length > 254) {
+        newErrors.email = 'El correo electronico debe tener maximo 254 caracteres.';
+        } else if (!emailRegex.test(formData.email)) {
+        newErrors.email = 'Ingresa un correo electronico valido.';
+        }
+
+        return newErrors;
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const validationErrors = validateForm();
+        setErrors(validationErrors);
+
+        if (Object.keys(validationErrors).length === 0) {
+            setIsModalOpen(true);
+        } else {
+            setIsModalOpen(false);
+        }
     };
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-200">
@@ -41,7 +76,7 @@ const RecoverPage = () => {
                             <h2 className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight">Recuperar tu contraseña</h2>
                             <p className="mt-1 text-sm text-slate-600">Ingresa tu correo electrónico.</p>
                         </div>
-                        <form className="space-y-5" noValidate>
+                        <form className="space-y-5" onSubmit={handleSubmit} noValidate>
                             <div className="space-y-2">
                                 <label
                                 htmlFor="password"
@@ -56,8 +91,11 @@ const RecoverPage = () => {
                                     placeholder="correo@ejemplo.com"
                                     value={formData.email}
                                     onChange={handleInputChange}
-                                    className={`w-full rounded-lg border bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:bg-white`}
+                                    className={`w-full rounded-lg border bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:bg-white ${
+                                        errors.email ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-blue-400'
+                                    }`}
                                 />
+                                {errors.email && <p className="ml-1 text-xs font-medium text-red-600">{errors.email}</p>}
                             </div>
                             <button
                                 type="submit"
@@ -75,6 +113,25 @@ const RecoverPage = () => {
                     </div>
                 </div>
             </main>
+            {isModalOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/45 px-4">
+                <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-7 shadow-2xl md:p-8">
+                    <div className="mb-5 border-b border-slate-200 pb-4">
+                    <h3 className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight text-slate-900">Solicitud enviada</h3>
+                    <p className="mt-1 text-sm text-slate-600">Por favor revisar su correo electrónico para continuar con el proceso de recuperación.</p>
+                    </div>
+                    <div className="mt-7 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={() => setIsModalOpen(false)}
+                        className="rounded-lg bg-blue-700 px-5 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-white transition hover:bg-blue-800"
+                    >
+                        Cerrar
+                    </button>
+                    </div>
+                </div>
+                </div>
+            )}
         </div>
     );
 };
