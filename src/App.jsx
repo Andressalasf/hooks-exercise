@@ -21,6 +21,7 @@ import UseSyncExternalStoreExample from './playground/UseSyncExternalStoreExampl
 import RegisterPage from './loginProject/RegisterPage';
 import LoginPage from './loginProject/LoginPage';
 import DashboardPage from './loginProject/DashboardPage';
+import RecoverPage from './loginProject/RecoverPage';
 import './App.css';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/recover" element={<RecoverPage />} />
         <Route path="/playground" element={<HomeHooks />} />
         <Route path="/playground/usestate" element={<UseStateExample />} />
         <Route path="/playground/useeffect" element={<UseEffectExample />} />

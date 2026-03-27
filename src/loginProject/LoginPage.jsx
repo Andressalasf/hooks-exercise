@@ -128,12 +128,10 @@ const LoginPage = () => {
                   >
                     Contraseña
                   </label>
-                  <a
-                    href="#"
-                    className="font-['Space_Grotesk'] text-xs font-semibold text-blue-700 hover:underline underline-offset-4"
-                  >
-                    ¿Olvidaste tu contraseña?
-                  </a>
+                  <Link to="/recover" className="font-['Space_Grotesk'] text-xs font-semibold text-blue-700 hover:underline underline-offset-4">
+                  ¿Olvidaste tu contraseña?
+                  </Link>
+                  
                 </div>
                 <div className="relative">
                   <input
