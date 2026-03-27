@@ -65,7 +65,7 @@ Lo que se realizo en esta pagina fue dejar la base funcional del flujo de inicio
 ## Funcionamiento de RecoverPage
 **Responsable:** Andrey Castilla Contreras
 
-La pagina de recuperación de contraseña se hizo para que un usuario registrado pueda solicitarla facilmente por correo y con retroalimentacion clara en cada campo.
+La pagina de recuperación de contrasena se hizo para que un usuario registrado pueda solicitarla facilmente por correo y con retroalimentacion clara en cada campo.
 
 Asi funciona:
 - El usuario ingresa su correo electronico en el formulario.
@@ -74,7 +74,23 @@ Asi funciona:
 - Si hay errores, se muestran mensajes debajo de cada campo para que el usuario sepa que debe corregir.
 - Si todo esta correcto, se crea una ventana modal informando del exito de la operación al usuario.
 
-Lo que se realizo en esta pagina fue dejar la base funcional del flujo de inicio de sesion: estructura visual, control de campos con React, validaciones iniciales, retroalimentacion al usuario.
+Lo que se realizo en esta pagina fue dejar la base funcional del flujo de recuperacion de contrasena: estructura visual, control de campos con React, validaciones iniciales, retroalimentacion al usuario.
+
+## Funcionamiento de ResetPage
+**Responsable:** Andrey Castilla Contreras
+
+La pagina de cambio de contrasena se hizo para que un usuario registrado pueda cambiar facilmente su contrasena y con retroalimentacion clara en cada campo.
+
+Asi funciona:
+- El usuario ingresa su contrasena actual y nueva en el formulario.
+- La pagina guarda el dato con estado de React para controlar lo que se escribe en el campo.
+- Hay un boton para mostrar u ocultar las contrasenas mientras se escribe, para evitar errores al ingresar.
+- Se revisan validaciones basicas al intentar enviar el formulario (longitud de caracteres, caracter especial en la nueva contrasena).
+- Se valida que la nueva contrasena sea diferente a la actual.
+- Si hay errores, se muestran mensajes debajo de cada campo para que el usuario sepa que debe corregir.
+- Si todo esta correcto, se crea una ventana modal informando del exito de la operación al usuario.
+
+Lo que se realizo en esta pagina fue dejar la base funcional del flujo de cambio de contrasena: estructura visual, control de campos con React, validaciones iniciales, retroalimentacion al usuario.
 
 ## Estructura del proyecto
 La estructura principal del repositorio es la siguiente:
@@ -88,7 +104,8 @@ hooks_exercise/
 |   |   |-- DashboardPage.jsx
 |   |   |-- LoginPage.jsx
 |   |   |-- RecoverPage.jsx
-|   |   `-- RegisterPage.jsx
+|   |   |-- RegisterPage.jsx
+|   |   `-- ResetPage.jsx
 |   |-- playground/
 |   |   |-- HomeHooks.jsx
 |   |   |-- UseActionStateExample.jsx
