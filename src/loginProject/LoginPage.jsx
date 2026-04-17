@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, googleProvider, hasFirebaseConfig } from '../firebase/firebaseConfig';
+import { googleUserExistsInFirestore } from './registerService';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -10,6 +13,9 @@ const LoginPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -47,13 +53,55 @@ const LoginPage = () => {
     return newErrors;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
+    setAuthError(null);
 
-    if (Object.keys(validationErrors).length === 0) {
+    if (Object.keys(validationErrors).length > 0) return;
+
+    if (!hasFirebaseConfig || !auth) {
+      setAuthError('La configuración de Firebase no es válida.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, formData.email.trim().toLowerCase(), formData.password);
       navigate('/dashboard');
+    } catch (error) {
+      if (error?.code === 'auth/user-not-found' || error?.code === 'auth/wrong-password' || error?.code === 'auth/invalid-credential') {
+        setAuthError('Correo o contraseña incorrectos.');
+      } else if (error?.code === 'auth/too-many-requests') {
+        setAuthError('Demasiados intentos fallidos. Intenta más tarde.');
+      } else {
+        setAuthError('No se pudo iniciar sesión. Intenta de nuevo.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    if (!hasFirebaseConfig || !auth || !googleProvider) {
+      setAuthError('La configuración de Firebase no es válida.');
+      return;
+    }
+
+    setAuthError(null);
+    setIsGoogleLoading(true);
+    try {
+      const { user } = await signInWithPopup(auth, googleProvider);
+      const exists = await googleUserExistsInFirestore(user.uid);
+      navigate(exists ? '/dashboard' : '/complete-profile');
+    } catch (error) {
+      const dismissed = error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request';
+      if (!dismissed) {
+        setAuthError('No se pudo iniciar sesión con Google. Intenta de nuevo.');
+      }
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -166,11 +214,18 @@ const LoginPage = () => {
                 {errors.password && <p className="ml-1 text-xs font-medium text-red-600">{errors.password}</p>}
               </div>
 
+              {authError && (
+                <p className="rounded-lg bg-red-50 px-4 py-3 text-center text-xs font-medium text-red-600 border border-red-200">
+                  {authError}
+                </p>
+              )}
+
               <button
                 type="submit"
-                className="flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-blue-700 to-blue-500 py-3.5 font-['Space_Grotesk'] text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.99]"
+                disabled={isLoading}
+                className="flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-blue-700 to-blue-500 py-3.5 font-['Space_Grotesk'] text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Iniciar sesión
+                {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
               </button>
             </form>
 
@@ -188,7 +243,9 @@ const LoginPage = () => {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 font-['Space_Grotesk'] text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                onClick={handleGoogleLogin}
+                disabled={isGoogleLoading}
+                className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 font-['Space_Grotesk'] text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
