@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
-import { auth, googleProvider, hasFirebaseConfig } from '../firebase/firebaseConfig';
+import { signInWithPopup, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { auth, googleProvider, githubProvider, hasFirebaseConfig } from '../firebase/firebaseConfig';
 import { googleUserExistsInFirestore } from './registerService';
 
 const LoginPage = () => {
@@ -99,6 +99,33 @@ const LoginPage = () => {
       const dismissed = error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request';
       if (!dismissed) {
         setAuthError('No se pudo iniciar sesión con Google. Intenta de nuevo.');
+      }
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const handleGithubLogin = async () => {
+    if (!hasFirebaseConfig || !auth || !githubProvider) {
+      setAuthError('La configuración de Firebase no es válida.');
+      return;
+    }
+
+    setAuthError(null);
+    setIsGoogleLoading(true);
+    try {
+      // Ensure the popup starts from a clean Firebase auth state.
+      if (auth.currentUser) {
+        await signOut(auth);
+      }
+
+      const { user } = await signInWithPopup(auth, githubProvider);
+      const exists = await googleUserExistsInFirestore(user.uid);
+      navigate(exists ? '/dashboard' : '/complete-profile');
+    } catch (error) {
+      const dismissed = error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request';
+      if (!dismissed) {
+        setAuthError('No se pudo iniciar sesión con GitHub. Intenta de nuevo.');
       }
     } finally {
       setIsGoogleLoading(false);
@@ -257,12 +284,14 @@ const LoginPage = () => {
               </button>
               <button
                 type="button"
+                onClick={handleGithubLogin}
+                disabled={isGoogleLoading}
                 className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 font-['Space_Grotesk'] text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
-                <svg className="h-4 w-4 text-[#1877F2]" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.884v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
+                <svg className="h-4 w-4 text-slate-900" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.09 1.83 1.23 1.83 1.23 1.08 1.84 2.82 1.31 3.5 1 .11-.77.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.95 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.52.12-3.17 0 0 1-.32 3.3 1.23a11.3 11.3 0 016 0c2.3-1.55 3.3-1.23 3.3-1.23.65 1.65.24 2.87.12 3.17.77.84 1.23 1.91 1.23 3.22 0 4.62-2.8 5.65-5.48 5.95.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.22.7.82.58A12 12 0 0024 12c0-6.63-5.37-12-12-12z" />
                 </svg>
-                Facebook
+                GitHub
               </button>
             </div>
 
