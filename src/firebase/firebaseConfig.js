@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, GithubAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, GithubAuthProvider, FacebookAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -17,6 +17,7 @@ let db = null;
 let auth = null;
 let googleProvider = null;
 let githubProvider = null;
+let facebookProvider = null;
 
 if (hasFirebaseConfig) {
   const app = initializeApp(firebaseConfig);
@@ -28,6 +29,10 @@ if (hasFirebaseConfig) {
   githubProvider = new GithubAuthProvider();
   githubProvider.addScope('user:email');
   githubProvider.setCustomParameters({ allow_signup: 'true' });
+
+  facebookProvider = new FacebookAuthProvider();
+  facebookProvider.addScope('email');
+
 }
 
-export { auth, db, hasFirebaseConfig, googleProvider, githubProvider };
+export { auth, db, hasFirebaseConfig, googleProvider, githubProvider, facebookProvider };
