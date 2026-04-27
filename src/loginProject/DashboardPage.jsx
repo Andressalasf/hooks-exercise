@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase/firebaseConfig';
 
 // ── Icon components ───────────────────────────────────────────────────────────
 
@@ -103,11 +104,14 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [codigoEstudiante, setCodigoEstudiante] = useState('');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        const snap = await getDoc(doc(db, 'usuarios_registrados', currentUser.uid));
+        if (snap.exists()) setCodigoEstudiante(snap.data().codigo ?? '');
       } else {
         navigate('/login');
       }
@@ -152,7 +156,9 @@ const DashboardPage = () => {
             </div>
             <div className="hidden lg:flex lg:flex-col">
               <span className="font-['Space_Grotesk'] text-sm font-bold leading-tight text-slate-900">{displayName}</span>
-              <span className="font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-wider text-slate-400">Estudiante</span>
+              <span className="font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Estudiante{codigoEstudiante ? ` / ${codigoEstudiante}` : ''}
+              </span>
             </div>
           </div>
         </div>
@@ -162,11 +168,11 @@ const DashboardPage = () => {
       <nav className="fixed left-0 top-0 z-40 hidden h-full w-64 flex-col border-r border-slate-200 bg-white/80 px-4 pb-8 pt-24 shadow-xl backdrop-blur-xl md:flex">
         <div className="mb-6 flex items-center gap-3 px-2">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-lg">
-            <img src="/logo.png" alt="CODECOMP logo" className="h-full w-full object-contain" />
+            <img src="/vite.svg" alt="CODECOMP logo" className="h-full w-full object-contain" />
           </div>
           <div>
             <h2 className="font-['Space_Grotesk'] text-lg font-bold text-slate-900">CODECOMP</h2>
-            <p className="font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-wider text-slate-500">Programa Ingenieria de Sistemas</p>
+            <p className="font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-wider text-slate-500">Programa Ingenieria de Sistemas UFPSO</p>
           </div>
         </div>
 
@@ -462,9 +468,141 @@ const DashboardPage = () => {
               </div>
             </div>
 
+            {/* ── Calendario RPC 2026 (6 cols) ── */}
+            <div className="col-span-1 flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:col-span-6">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <h3 className="font-['Space_Grotesk'] text-xl font-bold text-slate-900">Competencias RPC 2026</h3>
+                  <p className="mt-0.5 font-['Inter'] text-xs text-slate-400">Red de Programación Competitiva</p>
+                </div>
+                <a
+                  href="https://www.facebook.com/RedProgramacionCompetitiva"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 font-['Space_Grotesk'] text-xs font-semibold text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Ver RPC
+                </a>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {/* RPC 03 */}
+                <div className="flex gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                  <div className="flex w-14 shrink-0 flex-col items-center justify-center rounded-lg bg-blue-600 py-2 text-white">
+                    <span className="font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-wider opacity-80">Abr</span>
+                    <span className="font-['Space_Grotesk'] text-2xl font-black leading-none">11</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="mb-1 flex items-center gap-2">
+                      <span className="font-['Space_Grotesk'] text-sm font-bold text-slate-900">Competencia 03 RPC 2026</span>
+                      <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-wider text-slate-500">Finalizado</span>
+                    </div>
+                    <p className="font-['Inter'] text-xs text-slate-500">Sáb 11 de abril · 13:00 UTC-5 · 5 horas</p>
+                    <p className="mt-1 font-['Inter'] text-xs text-slate-400">~12 retos de todos los niveles para equipos latinos clasificatorios.</p>
+                  </div>
+                </div>
+
+                {/* RPC 02 */}
+                <div className="flex gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                  <div className="flex w-14 shrink-0 flex-col items-center justify-center rounded-lg bg-slate-400 py-2 text-white">
+                    <span className="font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-wider opacity-80">Mar</span>
+                    <span className="font-['Space_Grotesk'] text-2xl font-black leading-none">14</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="mb-1 flex items-center gap-2">
+                      <span className="font-['Space_Grotesk'] text-sm font-bold text-slate-900">Competencia 02 RPC 2026</span>
+                      <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-wider text-slate-500">Finalizado</span>
+                    </div>
+                    <p className="font-['Inter'] text-xs text-slate-500">Sáb 14 de marzo · 13:00 UTC-5 · 5 horas</p>
+                    <p className="mt-1 font-['Inter'] text-xs text-slate-400">Maratón con ~12 retos para continuar el ciclo de entrenamiento latino.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Leaderboard Grupo Estable (6 cols) ── */}
+            <div className="col-span-1 flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:col-span-6">
+              <div className="mb-5">
+                <h3 className="font-['Space_Grotesk'] text-xl font-bold text-slate-900">Grupo Estable</h3>
+                <p className="mt-0.5 font-['Inter'] text-xs text-slate-400">Maratón de Programación · UFPSO</p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {[
+                  { name: 'Javier Quintero',   code: '192163', pts: 0 },
+                  { name: 'Andres Salas',     code: '192164', pts: 0 },
+                  { name: 'Andrey Castilla',     code: '1021634', pts: 0 },
+                  { name: 'Laura Aura',     code: '1021592', pts: 0 },
+                  { name: 'Ivan Cepeda',    code: '1021718', pts: 0 },
+                ].map((player, i) => {
+                  const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null;
+                  const isTop = i < 3;
+                  const isCurrentUser = player.code === codigoEstudiante;
+                  return (
+                    <div
+                      key={player.code}
+                      className={`flex items-center gap-3 rounded-xl px-4 py-3 transition ${
+                        isCurrentUser
+                          ? 'border border-blue-200 bg-blue-50'
+                          : isTop
+                          ? 'bg-slate-50'
+                          : ''
+                      }`}
+                    >
+                      <span className="w-6 text-center font-['Space_Grotesk'] text-sm font-bold text-slate-400">
+                        {medal ?? <span className="text-slate-300">{i + 1}</span>}
+                      </span>
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-400 font-['Space_Grotesk'] text-sm font-bold text-white">
+                        {player.name[0]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`truncate font-['Space_Grotesk'] text-sm font-bold ${isCurrentUser ? 'text-blue-700' : 'text-slate-800'}`}>
+                          {player.name} {isCurrentUser && <span className="text-[10px] font-normal">(tú)</span>}
+                        </p>
+                        <p className="font-['Inter'] text-xs text-slate-400">{player.code}</p>
+                      </div>
+                      <span className="font-['Space_Grotesk'] text-sm font-bold text-slate-500">
+                        {player.pts} <span className="text-xs font-normal text-slate-400">pts</span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              
+            </div>
+
           </div>
         </div>
       </main>
+
+      {/* ── Footer ── */}
+      <footer className="ml-0 border-t border-slate-200 bg-white md:ml-64">
+        <div className="mx-auto max-w-6xl px-8 py-6">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+
+            <div className="flex items-center gap-3">
+              <img src="/vite.svg" alt="CODECOMP" className="h-7 w-7 opacity-80" />
+              <div>
+                <p className="font-['Space_Grotesk'] text-sm font-black text-slate-800">CODECOMP</p>
+                <p className="font-['Inter'] text-[11px] text-slate-400">Prototipo · 2026</p>
+              </div>
+            </div>
+
+            <p className="text-center font-['Inter'] text-xs text-slate-400">
+              Plataforma de programación competitiva con retroalimentación para la{' '}
+              <span className="font-semibold text-slate-500">Universidad Francisco de Paula de Santander</span>
+            </p>
+
+          
+
+          </div>
+        </div>
+      </footer>
+
     </div>
   );
 };
