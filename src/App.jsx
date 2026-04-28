@@ -21,6 +21,7 @@ import UseSyncExternalStoreExample from './playground/UseSyncExternalStoreExampl
 import RegisterPage from './loginProject/RegisterPage';
 import LoginPage from './loginProject/LoginPage';
 import DashboardPage from './loginProject/DashboardPage';
+import UserHistoryPage from './loginProject/UserHistoryPage';
 import RecoverPage from './loginProject/RecoverPage';
 import ResetPage from './loginProject/ResetPage';
 import CompleteProfilePage from './loginProject/CompleteProfilePage';
@@ -33,6 +34,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/historial-usuarios" element={<UserHistoryPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/recover" element={<RecoverPage />} />
         <Route path="/reset" element={<ResetPage />} />

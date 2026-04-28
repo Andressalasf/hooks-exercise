@@ -184,7 +184,7 @@ const DashboardPage = () => {
           </div>
           <NavItem icon={<TrophyIcon />} label="Retos Diarios" to="#" />
           <NavItem icon={<LeaderboardIcon />} label="Rankings" to="#" />
-          <NavItem icon={<HistoryIcon />} label="Usuarios" to="#" />
+          <NavItem icon={<HistoryIcon />} label="Historial" to="/historial-usuarios" />
           <NavItem icon={<CodeIcon />} label="Hooks Playground" to="/playground" />
         </div>
 
