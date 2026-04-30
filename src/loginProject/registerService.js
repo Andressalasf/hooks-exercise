@@ -1,5 +1,5 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, setDoc, collection, getDocs, query, orderBy, updateDoc } from 'firebase/firestore';
 import { auth, db, hasFirebaseConfig } from '../firebase/firebaseConfig';
 
 const USERS_COLLECTION = 'usuarios_registrados';
@@ -90,4 +90,123 @@ export const saveGoogleUserToFirestore = async ({ uid, email, nombre, apellido, 
   }
 
   return { id: uid, ...payload };
+};
+
+// Funciones para el historial de sesiones
+const SESSIONS_COLLECTION = 'historial_sesiones';
+
+export const getSessionsHistory = async () => {
+  if (!hasFirebaseConfig || !db) {
+    return [];
+  }
+
+  try {
+    const sessionsRef = collection(db, SESSIONS_COLLECTION);
+    
+    // Intentar primero con ordenamiento
+    try {
+      const q = query(sessionsRef, orderBy('entryTime', 'desc'));
+      const snap = await getDocs(q);
+
+      const sessions = [];
+      snap.forEach((doc) => {
+        sessions.push({ id: doc.id, ...doc.data() });
+      });
+      return sessions;
+    } catch (orderError) {
+      // Si falla el ordenamiento, intenta sin ordenar
+      const snap = await getDocs(sessionsRef);
+
+      const sessions = [];
+      snap.forEach((doc) => {
+        sessions.push({ id: doc.id, ...doc.data() });
+      });
+      
+      // Ordenar localmente si hay datos
+      return sessions.sort((a, b) => (b.entryTime || 0) - (a.entryTime || 0));
+    }
+  } catch (error) {
+    console.error('Error al obtener sesiones:', error.message);
+    return [];
+  }
+};
+
+export const updateSessionExit = async (sessionId, exitTime) => {
+  if (!hasFirebaseConfig || !db) {
+    throw new Error('La configuracion del proyecto no es valida.');
+  }
+
+  try {
+    await updateDoc(doc(db, SESSIONS_COLLECTION, sessionId), {
+      exitTime,
+      status: 'finalizado',
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    throw new Error('No se pudo actualizar la sesión.');
+  }
+};
+
+export const finalizeLatestActiveSession = async (uid, exitTime) => {
+  if (!hasFirebaseConfig || !db) {
+    throw new Error('La configuracion del proyecto no es valida.');
+  }
+
+  try {
+    const sessions = await getSessionsHistory();
+    const activeSession = sessions.find((session) => session.uid === uid && session.status === 'activo');
+
+    if (activeSession) {
+      await updateSessionExit(activeSession.id, exitTime);
+    }
+  } catch (error) {
+    console.error('Error al finalizar sesión activa:', error.message);
+    throw error;
+  }
+};
+
+export const createSessionRecord = async (uid, method) => {
+  if (!hasFirebaseConfig || !db) {
+    throw new Error('La configuracion del proyecto no es valida.');
+  }
+
+  try {
+    // Obtener datos del usuario registrado
+    const userSnap = await getDoc(doc(db, USERS_COLLECTION, uid));
+    
+    let userData;
+    if (userSnap.exists()) {
+      userData = userSnap.data();
+    } else {
+      // Si el usuario no existe aún, crear sesión con datos mínimos
+      userData = {
+        nombre: 'Usuario',
+        apellido: 'Nuevo',
+        email: uid,
+        codigo: '',
+      };
+    }
+
+    const sessionData = {
+      uid,
+      nombre: userData.nombre || 'Usuario',
+      apellido: userData.apellido || 'Nuevo',
+      email: userData.email || uid,
+      codigo: userData.codigo || '',
+      method: method.toLowerCase(),
+      entryTime: Date.now(),
+      exitTime: null,
+      status: 'activo',
+      createdAt: serverTimestamp(),
+    };
+
+    // Crear documento de sesión con ID único
+    const sessionId = `${uid}_${Date.now()}`;
+    await setDoc(doc(db, SESSIONS_COLLECTION, sessionId), sessionData);
+
+    return { id: sessionId, ...sessionData };
+  } catch (error) {
+    console.error('Error al crear registro de sesión:', error.message);
+    throw error;
+  }
 };

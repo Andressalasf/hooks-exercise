@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebaseConfig';
+import { getSessionsHistory, updateSessionExit } from './registerService';
 
 const HomeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -130,74 +131,18 @@ const statusStyles = {
   finalizado: 'border-rose-200 bg-rose-50 text-rose-700',
 };
 
-const historyRows = [
-  {
-    method: 'facebook',
-    name: 'Mariana',
-    lastName: 'Londoño',
-    email: 'mariana.londono@codecomp.edu',
-    code: '102415',
-    entry: '08:12',
-    exit: 'En curso',
-    status: 'activo',
-  },
-  {
-    method: 'github',
-    name: 'Juan',
-    lastName: 'Martinez',
-    email: 'juan.martinez@codecomp.edu',
-    code: '102416',
-    entry: '07:55',
-    exit: '10:40',
-    status: 'finalizado',
-  },
-  {
-    method: 'google',
-    name: 'Laura',
-    lastName: 'Gomez',
-    email: 'laura.gomez@codecomp.edu',
-    code: '102417',
-    entry: '09:03',
-    exit: '11:26',
-    status: 'finalizado',
-  },
-  {
-    method: 'password',
-    name: 'Daniel',
-    lastName: 'Perez',
-    email: 'daniel.perez@codecomp.edu',
-    code: '102418',
-    entry: '08:28',
-    exit: 'En curso',
-    status: 'activo',
-  },
-  {
-    method: 'github',
-    name: 'Sofia',
-    lastName: 'Castro',
-    email: 'sofia.castro@codecomp.edu',
-    code: '102419',
-    entry: '08:10',
-    exit: '10:02',
-    status: 'finalizado',
-  },
-  {
-    method: 'facebook',
-    name: 'Andres',
-    lastName: 'Quintero',
-    email: 'andres.quintero@codecomp.edu',
-    code: '102420',
-    entry: '09:10',
-    exit: 'En curso',
-    status: 'activo',
-  },
-];
-
 const UserHistoryPage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [codigoEstudiante, setCodigoEstudiante] = useState('');
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState(null);
+  const [methodFilter, setMethodFilter] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -205,9 +150,19 @@ const UserHistoryPage = () => {
         setUser(currentUser);
         const snap = await getDoc(doc(db, 'usuarios_registrados', currentUser.uid));
         if (snap.exists()) setCodigoEstudiante(snap.data().codigo ?? '');
+        
+        // Cargar historial de sesiones
+        try {
+          const sessionsData = await getSessionsHistory();
+          setSessions(sessionsData);
+        } catch (error) {
+          console.error('Error al cargar sesiones:', error);
+          setSessions([]);
+        }
       } else {
         navigate('/login');
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -215,19 +170,66 @@ const UserHistoryPage = () => {
 
   const displayName = user?.displayName || user?.email?.split('@')[0] || 'Usuario';
 
+  // Filtrar y buscar sesiones
+  const filteredSessions = useMemo(() => {
+    let result = [...sessions];
+
+    // Filtro de búsqueda
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((session) => {
+        const fullName = `${session.nombre || ''} ${session.apellido || ''}`.toLowerCase();
+        const email = (session.email || '').toLowerCase();
+        const codigo = (session.codigo || '').toLowerCase();
+        return fullName.includes(query) || email.includes(query) || codigo.includes(query);
+      });
+    }
+
+    // Filtro de estado
+    if (statusFilter) {
+      result = result.filter((session) => session.status === statusFilter);
+    }
+
+    // Filtro de método
+    if (methodFilter) {
+      result = result.filter((session) => session.method === methodFilter);
+    }
+
+    return result;
+  }, [sessions, searchQuery, statusFilter, methodFilter]);
+
+  // Paginación
+  const totalPages = Math.ceil(filteredSessions.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedSessions = filteredSessions.slice(startIndex, startIndex + itemsPerPage);
+
+  // Resetear a página 1 cuando cambian filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, methodFilter]);
+
   const handleLogout = async () => {
+    try {
+      // Finalizar la sesión activa del usuario actual
+      if (user) {
+        const activeSession = sessions.find(s => s.uid === user.uid && s.status === 'activo');
+        if (activeSession) {
+          await updateSessionExit(activeSession.id, Date.now());
+        }
+      }
+    } catch (error) {
+      console.error('Error al finalizar sesión:', error);
+    }
+    
     await signOut(auth);
     navigate('/login');
   };
 
-  const filterButtons = [
-    { label: 'Activos', className: 'hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700' },
-    { label: 'Finalizados', className: 'hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700' },
-    { label: 'Facebook', className: 'hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700' },
-    { label: 'GitHub', className: 'hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600' },
-    { label: 'Google', className: 'hover:border-blue-200 hover:bg-blue-50 hover:text-blue-500' },
-    { label: 'Email/Password', className: 'hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800' },
-  ];
+  const formatTime = (timestamp) => {
+    if (!timestamp) return 'En curso';
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#f6f8fc] text-slate-900 selection:bg-blue-200">
@@ -317,6 +319,8 @@ const UserHistoryPage = () => {
                 </span>
                 <input
                   type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Buscar por nombre, apellidos, código o correo"
                   className="w-full rounded-2xl border border-blue-100 bg-white py-3.5 pl-11 pr-4 font-['Inter'] text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.08)]"
                 />
@@ -336,38 +340,73 @@ const UserHistoryPage = () => {
 
             {isFiltersOpen && (
               <div className="mt-4 rounded-[24px] border border-blue-100 bg-blue-50/70 p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <button className="rounded-full border border-blue-100 bg-white px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold text-blue-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800">
-                    Más recientes
+                <p className="mb-3 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wide text-blue-700">Estado</p>
+                <div className="mb-4 flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => setStatusFilter(null)}
+                    className={`rounded-full border px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold transition ${
+                      statusFilter === null
+                        ? 'border-blue-200 bg-blue-50 text-blue-700'
+                        : 'border-blue-100 bg-white text-blue-700 hover:border-blue-200 hover:bg-blue-50'
+                    }`}
+                  >
+                    Todos
                   </button>
-                  <button className="rounded-full border border-blue-100 bg-white px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold text-blue-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800">
-                    Ordenar
+                  <button
+                    onClick={() => setStatusFilter('activo')}
+                    className={`rounded-full border px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold transition ${
+                      statusFilter === 'activo'
+                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                        : 'border-blue-100 bg-white text-blue-700 hover:border-blue-200 hover:bg-blue-50'
+                    }`}
+                  >
+                    Activos
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter('finalizado')}
+                    className={`rounded-full border px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold transition ${
+                      statusFilter === 'finalizado'
+                        ? 'border-rose-200 bg-rose-50 text-rose-700'
+                        : 'border-blue-100 bg-white text-blue-700 hover:border-blue-200 hover:bg-blue-50'
+                    }`}
+                  >
+                    Finalizados
                   </button>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {filterButtons.map((item) => (
+                <p className="mb-3 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wide text-blue-700">Método de autenticación</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setMethodFilter(null)}
+                    className={`rounded-full border px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold transition ${
+                      methodFilter === null
+                        ? 'border-blue-200 bg-blue-50 text-blue-700'
+                        : 'border-blue-100 bg-white text-blue-700 hover:border-blue-200 hover:bg-blue-50'
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  {['facebook', 'github', 'google', 'password'].map((method) => (
                     <button
-                      key={item.label}
-                      className={`rounded-full border border-blue-100 bg-white px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold text-blue-700 transition shadow-sm ${item.className}`}
+                      key={method}
+                      onClick={() => setMethodFilter(method)}
+                      className={`rounded-full border px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold transition ${
+                        methodFilter === method
+                          ? 'border-blue-200 bg-blue-50 text-blue-700'
+                          : 'border-blue-100 bg-white text-blue-700 hover:border-blue-200 hover:bg-blue-50'
+                      }`}
                     >
-                      {item.label}
+                      {method === 'password' ? 'Email/Password' : method.charAt(0).toUpperCase() + method.slice(1)}
                     </button>
                   ))}
-                </div>
-
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-blue-700">Nombre</span>
-                  <span className="rounded-full border border-blue-100 bg-white px-3 py-1 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-blue-600">Apellidos</span>
-                  <span className="rounded-full border border-blue-100 bg-white px-3 py-1 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-blue-600">Código</span>
-                  <span className="rounded-full border border-blue-100 bg-white px-3 py-1 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-blue-600">Correo</span>
-                  <span className="rounded-full border border-blue-100 bg-white px-3 py-1 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-blue-600">Estado</span>
                 </div>
               </div>
             )}
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-              <p className="font-['Inter'] text-sm text-slate-500">Mostrando 1-6 de 128 usuarios</p>
+              <p className="font-['Inter'] text-sm text-slate-500">
+                Mostrando {paginatedSessions.length > 0 ? startIndex + 1 : 0}-{startIndex + paginatedSessions.length} de {filteredSessions.length} usuarios
+              </p>
             </div>
           </section>
 
@@ -377,53 +416,63 @@ const UserHistoryPage = () => {
                 <h2 className="font-['Space_Grotesk'] text-2xl font-bold text-blue-900">Listado de sesiones</h2>
               </div>
 
-              <div className="hidden grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1.2fr)_minmax(0,1.25fr)_minmax(0,0.9fr)_auto] gap-4 border-b border-blue-100/60 bg-blue-50/40 px-6 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-400 lg:grid">
+              <div className="hidden grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1.2fr)_minmax(0,1.25fr)_minmax(0,0.9fr)] gap-4 border-b border-blue-100/60 bg-blue-50/40 px-6 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-400 lg:grid">
                 <span>Estado</span>
                 <span>Usuario</span>
                 <span>Método</span>
                 <span>Correo y código</span>
                 <span>Horario</span>
-                <span className="text-right">Acción</span>
               </div>
 
               <div className="divide-y divide-blue-50">
-                {historyRows.map((row) => (
-                  <div key={`${row.email}-${row.code}`} className="grid gap-4 px-5 py-5 transition hover:bg-blue-50/50 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1.2fr)_minmax(0,1.25fr)_minmax(0,0.9fr)_auto] lg:items-center lg:px-6">
-                    <div className="min-w-0 flex items-center">
-                      <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider ${statusStyles[row.status]}`}>
-                        <span className={`h-2.5 w-2.5 rounded-full ${row.status === 'activo' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                        {row.status}
-                      </span>
-                    </div>
+                {paginatedSessions.length > 0 ? (
+                  paginatedSessions.map((session) => (
+                    <div
+                      key={session.id}
+                      className="grid gap-4 px-5 py-5 transition hover:bg-blue-50/50 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1.2fr)_minmax(0,1.25fr)_minmax(0,0.9fr)] lg:items-center lg:px-6"
+                    >
+                      <div className="min-w-0 flex items-center">
+                        <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider ${statusStyles[session.status]}`}>
+                          <span className={`h-2.5 w-2.5 rounded-full ${session.status === 'activo' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                          {session.status}
+                        </span>
+                      </div>
 
-                    <div className="min-w-0">
-                      <p className="truncate font-['Space_Grotesk'] text-[15px] font-bold text-blue-950">{row.name} {row.lastName}</p>
-                      <p className="truncate font-['Inter'] text-sm text-slate-500">{row.email}</p>
-                    </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-['Space_Grotesk'] text-[15px] font-bold text-blue-950">
+                          {session.nombre} {session.apellido}
+                        </p>
+                        <p className="truncate font-['Inter'] text-sm text-slate-500">{session.email}</p>
+                      </div>
 
-                    <div className="min-w-0">
-                      <p className="truncate font-['Space_Grotesk'] text-sm font-semibold uppercase tracking-wide text-blue-700">
-                        {row.method === 'password' ? 'Email / Password' : row.method}
-                      </p>
-                    </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-['Space_Grotesk'] text-sm font-semibold uppercase tracking-wide text-blue-700">
+                          {session.method === 'password' ? 'Email / Password' : session.method}
+                        </p>
+                      </div>
 
-                    <div className="min-w-0">
-                      <p className="truncate font-['Space_Grotesk'] text-sm font-bold text-blue-950">{row.email}</p>
-                      <p className="truncate font-['Inter'] text-xs text-slate-400">Código: {row.code}</p>
-                    </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-['Space_Grotesk'] text-sm font-bold text-blue-950">{session.email}</p>
+                        <p className="truncate font-['Inter'] text-xs text-slate-400">Código: {session.codigo}</p>
+                      </div>
 
-                    <div className="min-w-0 flex flex-col gap-1">
-                      <p className="truncate font-['Space_Grotesk'] text-sm font-bold text-blue-950">Entrada {row.entry}</p>
-                      <p className="truncate font-['Space_Grotesk'] text-sm font-bold text-blue-500">Salida {row.exit}</p>
+                      <div className="min-w-0 flex flex-col gap-1">
+                        <p className="truncate font-['Space_Grotesk'] text-sm font-bold text-blue-950">
+                          Entrada {formatTime(session.entryTime)}
+                        </p>
+                        <p className="truncate font-['Space_Grotesk'] text-sm font-bold text-blue-500">
+                          Salida {formatTime(session.exitTime)}
+                        </p>
+                      </div>
                     </div>
-
-                    <div className="flex justify-start lg:justify-end">
-                      <button className="rounded-full border border-blue-100 bg-white px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold text-blue-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800">
-                        Ver detalle
-                      </button>
-                    </div>
+                  ))
+                ) : (
+                  <div className="px-6 py-16 text-center">
+                    <p className="font-['Inter'] text-base text-slate-500">
+                      {loading ? 'Cargando sesiones...' : 'No hay sesiones registradas'}
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </article>
           </section>
@@ -434,23 +483,56 @@ const UserHistoryPage = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <button className="flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-blue-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className={`flex items-center gap-2 rounded-full border px-4 py-2.5 font-['Space_Grotesk'] text-sm font-semibold transition ${
+                  currentPage === 1
+                    ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
+                    : 'border-blue-100 bg-white text-blue-700 hover:border-blue-200 hover:bg-blue-50'
+                }`}
+              >
                 <ChevronLeftIcon />
                 Anterior
               </button>
-              <button className="rounded-full border border-blue-200 bg-blue-50 px-4 py-2.5 font-['Space_Grotesk'] text-sm font-bold text-blue-700">1</button>
-              <button className="rounded-full border border-blue-100 bg-white px-4 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-blue-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800">2</button>
-              <button className="rounded-full border border-blue-100 bg-white px-4 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-blue-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800">3</button>
-              <span className="flex h-11 items-center justify-center px-1 text-blue-300"><EllipsisIcon /></span>
-              <button className="rounded-full border border-blue-100 bg-white px-4 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-blue-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800">9</button>
-              <button className="flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-blue-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800">
+
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                const pageNum = i + 1;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`rounded-full border px-4 py-2.5 font-['Space_Grotesk'] text-sm font-semibold transition ${
+                      currentPage === pageNum
+                        ? 'border-blue-200 bg-blue-50 text-blue-700'
+                        : 'border-blue-100 bg-white text-blue-700 hover:border-blue-200 hover:bg-blue-50'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              {totalPages > 5 && <span className="flex h-11 items-center justify-center px-1 text-blue-300"><EllipsisIcon /></span>}
+
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className={`flex items-center gap-2 rounded-full border px-4 py-2.5 font-['Space_Grotesk'] text-sm font-semibold transition ${
+                  currentPage === totalPages || totalPages === 0
+                    ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
+                    : 'border-blue-100 bg-white text-blue-700 hover:border-blue-200 hover:bg-blue-50'
+                }`}
+              >
                 Siguiente
                 <ChevronRightIcon />
               </button>
             </div>
 
             <div className="hidden lg:block">
-              <p className="font-['Inter'] text-sm text-blue-500">Mostrando 1-6 de 128 usuarios</p>
+              <p className="font-['Inter'] text-sm text-blue-500">
+                Mostrando {paginatedSessions.length > 0 ? startIndex + 1 : 0}-{startIndex + paginatedSessions.length} de {filteredSessions.length}
+              </p>
             </div>
           </section>
         </div>

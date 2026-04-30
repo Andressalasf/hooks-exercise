@@ -28,10 +28,16 @@ if (hasFirebaseConfig) {
 
   githubProvider = new GithubAuthProvider();
   githubProvider.addScope('user:email');
-  githubProvider.setCustomParameters({ allow_signup: 'true' });
+  githubProvider.setCustomParameters({ 
+    allow_signup: 'true',
+    prompt: 'login' // Fuerza seleccionar cuenta GitHub
+  });
 
   facebookProvider = new FacebookAuthProvider();
   facebookProvider.addScope('email');
+  facebookProvider.setCustomParameters({ 
+    prompt: 'login' // Fuerza seleccionar cuenta Facebook
+  });
 
 }
 
