@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebaseConfig';
+import { getSessionsHistory, updateSessionExit } from './registerService';
 
 // ── Icon components ───────────────────────────────────────────────────────────
 
@@ -121,8 +122,24 @@ const DashboardPage = () => {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    await signOut(auth);
-    navigate('/login');
+    try {
+      // Finalizar la sesión activa del usuario usando el mismo patrón que el historial
+      if (user) {
+        const sessions = await getSessionsHistory();
+        const activeSession = sessions.find((session) => session.uid === user.uid && session.status === 'activo');
+
+        if (activeSession) {
+          await updateSessionExit(activeSession.id, Date.now());
+        }
+      }
+
+      await signOut(auth);
+      navigate('/login');
+    } catch (error) {
+      console.error('Error al finalizar sesión:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const displayName = user?.displayName || user?.email?.split('@')[0] || 'Usuario';
@@ -184,7 +201,7 @@ const DashboardPage = () => {
           </div>
           <NavItem icon={<TrophyIcon />} label="Retos Diarios" to="#" />
           <NavItem icon={<LeaderboardIcon />} label="Rankings" to="#" />
-          <NavItem icon={<HistoryIcon />} label="Historial" to="/historial-usuarios" />
+          <NavItem icon={<HistoryIcon />} label="Usuarios" to="/historial-usuarios" />
           <NavItem icon={<CodeIcon />} label="Hooks Playground" to="/playground" />
         </div>
 

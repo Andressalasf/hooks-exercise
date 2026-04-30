@@ -1,8 +1,17 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithPopup, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import {
+  FacebookAuthProvider,
+  fetchSignInMethodsForEmail,
+  GithubAuthProvider,
+  GoogleAuthProvider,
+  linkWithCredential,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+} from 'firebase/auth';
 import { auth, googleProvider, githubProvider, facebookProvider, hasFirebaseConfig } from '../firebase/firebaseConfig';
-import { googleUserExistsInFirestore } from './registerService';
+import { googleUserExistsInFirestore, createSessionRecord } from './registerService';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -16,6 +25,10 @@ const LoginPage = () => {
   const [authError, setAuthError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [pendingCredential, setPendingCredential] = useState(null);
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [pendingMethods, setPendingMethods] = useState([]);
+  const [pendingProvider, setPendingProvider] = useState('');
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -53,6 +66,86 @@ const LoginPage = () => {
     return newErrors;
   };
 
+  const clearPendingLinkState = () => {
+    setPendingCredential(null);
+    setPendingEmail('');
+    setPendingMethods([]);
+    setPendingProvider('');
+  };
+
+  const getProviderLabel = (providerId) => {
+    const labels = {
+      password: 'correo y contraseña',
+      'google.com': 'Google',
+      'github.com': 'GitHub',
+      'facebook.com': 'Facebook',
+    };
+
+    return labels[providerId] || providerId;
+  };
+
+  const getPendingCredentialFromError = (error, providerClass) => {
+    if (providerClass?.credentialFromError) {
+      return providerClass.credentialFromError(error);
+    }
+
+    return error?.credential || null;
+  };
+
+  const promptAccountLinking = async (error, providerClass, providerName) => {
+    const email = error?.customData?.email || error?.email;
+    const pending = getPendingCredentialFromError(error, providerClass);
+
+    if (!email || !pending) {
+      throw error;
+    }
+
+    const methods = await fetchSignInMethodsForEmail(auth, email).catch(() => []);
+    setPendingCredential(pending);
+    setPendingEmail(email);
+    setPendingMethods(methods);
+    setPendingProvider(providerName);
+
+    const methodsText = methods.length > 0
+      ? methods.map(getProviderLabel).join(', ')
+      : 'el método de autenticación original';
+
+    setAuthError(`Este correo ya está registrado. Inicia sesión con ${methodsText} y luego vincularemos ${providerName}.`);
+  };
+
+  const finishLogin = async (user, method) => {
+    const shouldLinkPendingCredential = pendingCredential && pendingEmail && user?.email && user.email.toLowerCase() === pendingEmail.toLowerCase();
+
+    if (pendingCredential && !shouldLinkPendingCredential) {
+      clearPendingLinkState();
+    }
+
+    if (shouldLinkPendingCredential) {
+      try {
+        await linkWithCredential(user, pendingCredential);
+        clearPendingLinkState();
+      } catch (linkError) {
+        console.error('Error al vincular credencial pendiente:', linkError?.code, linkError?.message);
+        clearPendingLinkState();
+
+        if (linkError?.code === 'auth/email-already-in-use') {
+          setAuthError('La cuenta ya tiene ese proveedor vinculado. Inicia sesión con el método original y prueba otra vez.');
+        } else {
+          setAuthError('Se inició sesión, pero no se pudo vincular la otra credencial.');
+        }
+      }
+    }
+
+    try {
+      await createSessionRecord(user.uid, method);
+    } catch (sessionError) {
+      console.error('Error al registrar sesión:', sessionError.message);
+    }
+
+    const exists = await googleUserExistsInFirestore(user.uid);
+    navigate(exists ? '/dashboard' : '/complete-profile');
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validateForm();
@@ -68,8 +161,9 @@ const LoginPage = () => {
 
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, formData.email.trim().toLowerCase(), formData.password);
-      navigate('/dashboard');
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email.trim().toLowerCase(), formData.password);
+
+      await finishLogin(userCredential.user, 'password');
     } catch (error) {
       if (error?.code === 'auth/user-not-found' || error?.code === 'auth/wrong-password' || error?.code === 'auth/invalid-credential') {
         setAuthError('Correo o contraseña incorrectos.');
@@ -83,8 +177,8 @@ const LoginPage = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    if (!hasFirebaseConfig || !auth || !googleProvider) {
+  const handleOAuthLogin = async (provider, providerClass, providerName, sessionMethod) => {
+    if (!hasFirebaseConfig || !auth || !provider) {
       setAuthError('La configuración de Firebase no es válida.');
       return;
     }
@@ -92,71 +186,42 @@ const LoginPage = () => {
     setAuthError(null);
     setIsGoogleLoading(true);
     try {
-      const { user } = await signInWithPopup(auth, googleProvider);
-      const exists = await googleUserExistsInFirestore(user.uid);
-      navigate(exists ? '/dashboard' : '/complete-profile');
+      if (auth.currentUser) {
+        await signOut(auth);
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+
+      const { user } = await signInWithPopup(auth, provider);
+      await finishLogin(user, sessionMethod);
     } catch (error) {
       const dismissed = error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request';
-      if (!dismissed) {
-        setAuthError('No se pudo iniciar sesión con Google. Intenta de nuevo.');
+
+      if (error?.code === 'auth/account-exists-with-different-credential') {
+        try {
+          await promptAccountLinking(error, providerClass, providerName);
+        } catch (linkingError) {
+          console.error(`Error al preparar el enlace con ${providerName}:`, linkingError?.code, linkingError?.message);
+          setAuthError(`No se pudo iniciar el proceso de vinculación con ${providerName}.`);
+        }
+      } else if (!dismissed) {
+        console.error(`Error al iniciar sesión con ${providerName}:`, error?.code, error?.message);
+        setAuthError(`No se pudo iniciar sesión con ${providerName}. Intenta de nuevo.`);
       }
     } finally {
       setIsGoogleLoading(false);
     }
+  };
+
+  const handleGoogleLogin = async () => {
+    return handleOAuthLogin(googleProvider, GoogleAuthProvider, 'Google', 'google');
   };
 
   const handleGithubLogin = async () => {
-    if (!hasFirebaseConfig || !auth || !githubProvider) {
-      setAuthError('La configuración de Firebase no es válida.');
-      return;
-    }
-
-    setAuthError(null);
-    setIsGoogleLoading(true);
-    try {
-      // Ensure the popup starts from a clean Firebase auth state.
-      if (auth.currentUser) {
-        await signOut(auth);
-      }
-
-      const { user } = await signInWithPopup(auth, githubProvider);
-      const exists = await googleUserExistsInFirestore(user.uid);
-      navigate(exists ? '/dashboard' : '/complete-profile');
-    } catch (error) {
-      const dismissed = error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request';
-      if (!dismissed) {
-        setAuthError('No se pudo iniciar sesión con GitHub. Intenta de nuevo.');
-      }
-    } finally {
-      setIsGoogleLoading(false);
-    }
+    return handleOAuthLogin(githubProvider, GithubAuthProvider, 'GitHub', 'github');
   };
 
   const handleFacebookLogin = async () => {
-    if (!hasFirebaseConfig || !auth || !facebookProvider) {
-      setAuthError('La configuración de Firebase no es válida.');
-      return;
-    }
-
-    setAuthError(null);
-    setIsGoogleLoading(true);
-    try {
-      // Ensure the popup starts from a clean Firebase auth state.
-      if (auth.currentUser) {
-        await signOut(auth);
-      }
-
-      const { user } = await signInWithPopup(auth, facebookProvider);
-      const exists = await googleUserExistsInFirestore(user.uid);
-      navigate(exists ? '/dashboard' : '/complete-profile');
-    } catch (error) {
-      const dismissed = error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request';
-      if (!dismissed) {
-        setAuthError('No se pudo iniciar sesión con Facebook. Intenta de nuevo.');
-      }
-    } finally {
-      setIsGoogleLoading(false);
-    }
+    return handleOAuthLogin(facebookProvider, FacebookAuthProvider, 'Facebook', 'facebook');
   };
 
   return (
@@ -197,6 +262,12 @@ const LoginPage = () => {
             <div className="mb-7">
               <h2 className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight">Iniciar sesión</h2>
               <p className="mt-1 text-sm text-slate-600">Ingresa tus credenciales para continuar.</p>
+              {pendingCredential && (
+                <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-800">
+                  Ya existe una cuenta para {pendingEmail}. Inicia sesión con {pendingMethods.length > 0 ? pendingMethods.map(getProviderLabel).join(', ') : 'el método original'}
+                  {pendingProvider ? ` y luego vincularé ${pendingProvider}.` : '.'}
+                </div>
+              )}
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit} noValidate>
