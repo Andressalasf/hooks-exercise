@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { auth, hasFirebaseConfig } from '../firebase/firebaseConfig';
 
 const ResetPage = () => {
     const [formData, setFormData] = useState({
@@ -9,6 +11,9 @@ const ResetPage = () => {
     const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [isError, setIsError] = useState(false);
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setFormData((prevData) => ({
@@ -42,15 +47,61 @@ const ResetPage = () => {
         }
         return newErrors;
     };
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         const validationErrors = validateForm();
         setErrors(validationErrors);
 
-        if (Object.keys(validationErrors).length === 0) {
-            setIsModalOpen(true);
-        } else {
+        if (Object.keys(validationErrors).length > 0) {
             setIsModalOpen(false);
+            return;
+        }
+
+        if (!hasFirebaseConfig || !auth) {
+            setModalMessage('La configuración de Firebase no es válida.');
+            setIsError(true);
+            setIsModalOpen(true);
+            return;
+        }
+
+        const user = auth.currentUser;
+        if (!user) {
+            setModalMessage('No hay un usuario autenticado.');
+            setIsError(true);
+            setIsModalOpen(true);
+            return;
+        }
+
+        setIsLoading(true);
+        setIsError(false);
+        try {
+            // Verifica la contraseña actual del usuario antes de permitir el cambio
+            const credential = EmailAuthProvider.credential(user.email, formData.password);
+            await reauthenticateWithCredential(user, credential);
+
+            // Update password
+            await updatePassword(user, formData.newPassword);
+
+            setModalMessage('Tu contraseña ha sido cambiada exitosamente.');
+            setIsError(false);
+            setIsModalOpen(true);
+            setFormData({ password: '', newPassword: '' });
+        } catch (error) {
+            if (error?.code === 'auth/wrong-password') {
+                setModalMessage('La contraseña actual es incorrecta.');
+            } else if (error?.code === 'auth/weak-password') {
+                setModalMessage('La nueva contraseña es demasiado débil.');
+            } else if (error?.code === 'auth/requires-recent-login') {
+                setModalMessage('Por seguridad, necesitas volver a iniciar sesión antes de cambiar tu contraseña.');
+            } else if (error?.code === 'auth/too-many-requests') {
+                setModalMessage('Demasiados intentos. Por favor intenta más tarde.');
+            } else {
+                setModalMessage('No se pudo cambiar la contraseña. Intenta de nuevo.');
+            }
+            setIsError(true);
+            setIsModalOpen(true);
+        } finally {
+            setIsLoading(false);
         }
     };
     return (
@@ -162,9 +213,10 @@ const ResetPage = () => {
                             </div>
                             <button
                                 type="submit"
-                                className="flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-blue-700 to-blue-500 py-3.5 font-['Space_Grotesk'] text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.99]"
+                                disabled={isLoading}
+                                className="flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-blue-700 to-blue-500 py-3.5 font-['Space_Grotesk'] text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
                             >
-                                Cambiar contraseña
+                                {isLoading ? 'Cambiando...' : 'Cambiar contraseña'}
                             </button>
                         </form>
                         <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-5 text-sm text-slate-600 md:flex-row">
@@ -179,15 +231,19 @@ const ResetPage = () => {
             {isModalOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/45 px-4">
                     <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-7 shadow-2xl md:p-8">
-                        <div className="mb-5 border-b border-slate-200 pb-4">
-                            <h3 className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight text-slate-900">Operación exitosa</h3>
-                            <p className="mt-1 text-sm text-slate-600">Su contraseña ha sido modificada.</p>
+                        <div className={`mb-5 border-b pb-4 ${ isError ? 'border-red-200' : 'border-slate-200' }`}>
+                            <h3 className={`font-['Space_Grotesk'] text-2xl font-bold tracking-tight ${isError ? 'text-red-600' : 'text-slate-900'}`}>
+                                {isError ? 'Error' : 'Operación exitosa'}
+                            </h3>
+                            <p className={`mt-1 text-sm ${isError ? 'text-red-600' : 'text-slate-600'}`}>{modalMessage}</p>
                         </div>
                         <div className="mt-7 flex justify-end">
                         <button
                             type="button"
                             onClick={() => setIsModalOpen(false)}
-                            className="rounded-lg bg-blue-700 px-5 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-white transition hover:bg-blue-800"
+                            className={`rounded-lg px-5 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-white transition ${
+                                isError ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-700 hover:bg-blue-800'
+                            }`}
                         >
                             Cerrar
                         </button>
