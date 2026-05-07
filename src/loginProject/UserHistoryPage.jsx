@@ -231,6 +231,16 @@ const UserHistoryPage = () => {
     return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   };
 
+  const formatDateTime = (timestamp) => {
+    if (!timestamp) return 'En curso';
+    const date = new Date(timestamp);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const time = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    return `${day}/${month}/${year} ${time}`;
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#f6f8fc] text-slate-900 selection:bg-blue-200">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -416,7 +426,7 @@ const UserHistoryPage = () => {
                 <h2 className="font-['Space_Grotesk'] text-2xl font-bold text-blue-900">Listado de sesiones</h2>
               </div>
 
-              <div className="hidden grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1.2fr)_minmax(0,1.25fr)_minmax(0,0.9fr)] gap-4 border-b border-blue-100/60 bg-blue-50/40 px-6 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-400 lg:grid">
+              <div className="hidden grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1.2fr)_minmax(0,1.25fr)_minmax(0,1.8fr)] gap-4 border-b border-blue-100/60 bg-blue-50/40 px-6 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-400 lg:grid">
                 <span>Estado</span>
                 <span>Usuario</span>
                 <span>Método</span>
@@ -429,7 +439,7 @@ const UserHistoryPage = () => {
                   paginatedSessions.map((session) => (
                     <div
                       key={session.id}
-                      className="grid gap-4 px-5 py-5 transition hover:bg-blue-50/50 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1.2fr)_minmax(0,1.25fr)_minmax(0,0.9fr)] lg:items-center lg:px-6"
+                      className="grid gap-4 px-5 py-5 transition hover:bg-blue-50/50 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1.2fr)_minmax(0,1.25fr)_minmax(0,1.8fr)] lg:items-center lg:px-6"
                     >
                       <div className="min-w-0 flex items-center">
                         <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider ${statusStyles[session.status]}`}>
@@ -458,10 +468,10 @@ const UserHistoryPage = () => {
 
                       <div className="min-w-0 flex flex-col gap-1">
                         <p className="truncate font-['Space_Grotesk'] text-sm font-bold text-blue-950">
-                          Entrada {formatTime(session.entryTime)}
+                          Entrada {formatDateTime(session.entryTime)}
                         </p>
                         <p className="truncate font-['Space_Grotesk'] text-sm font-bold text-blue-500">
-                          Salida {formatTime(session.exitTime)}
+                          Salida {formatDateTime(session.exitTime)}
                         </p>
                       </div>
                     </div>
