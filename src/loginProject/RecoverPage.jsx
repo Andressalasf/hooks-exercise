@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth, hasFirebaseConfig } from '../firebase/firebaseConfig';
 
 const RecoverPage = () => {
 
@@ -8,6 +10,9 @@ const RecoverPage = () => {
     });
     const [errors, setErrors] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [isError, setIsError] = useState(false);
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setFormData((prevData) => ({
@@ -37,15 +42,43 @@ const RecoverPage = () => {
         return newErrors;
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         const validationErrors = validateForm();
         setErrors(validationErrors);
 
-        if (Object.keys(validationErrors).length === 0) {
-            setIsModalOpen(true);
-        } else {
+        if (Object.keys(validationErrors).length > 0) {
             setIsModalOpen(false);
+            return;
+        }
+
+        if (!hasFirebaseConfig || !auth) {
+            setModalMessage('La configuración de Firebase no es válida.');
+            setIsError(true);
+            setIsModalOpen(true);
+            return;
+        }
+
+        setIsLoading(true);
+        setIsError(false);
+        try {
+            await sendPasswordResetEmail(auth, formData.email.trim().toLowerCase());
+            setModalMessage('Se ha enviado un correo de recuperación a tu dirección de email. Por favor revisa tu bandeja de entrada para continuar.');
+            setIsError(false);
+            setIsModalOpen(true);
+            setFormData({ email: '' });
+        } catch (error) {
+            if (error?.code === 'auth/user-not-found') {
+                setModalMessage('No encontramos una cuenta con este correo electrónico.');
+            } else if (error?.code === 'auth/too-many-requests') {
+                setModalMessage('Demasiados intentos. Por favor intenta más tarde.');
+            } else {
+                setModalMessage('No se pudo enviar el correo de recuperación. Intenta de nuevo.');
+            }
+            setIsError(true);
+            setIsModalOpen(true);
+        } finally {
+            setIsLoading(false);
         }
     };
     return (
@@ -99,9 +132,10 @@ const RecoverPage = () => {
                             </div>
                             <button
                                 type="submit"
-                                className="flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-blue-700 to-blue-500 py-3.5 font-['Space_Grotesk'] text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.99]"
+                                disabled={isLoading}
+                                className="flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-blue-700 to-blue-500 py-3.5 font-['Space_Grotesk'] text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
                             >
-                                Recuperar contraseña
+                                {isLoading ? 'Enviando...' : 'Recuperar contraseña'}
                             </button>
                         </form>
                         <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-5 text-sm text-slate-600 md:flex-row">
@@ -116,15 +150,19 @@ const RecoverPage = () => {
             {isModalOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/45 px-4">
                 <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-7 shadow-2xl md:p-8">
-                    <div className="mb-5 border-b border-slate-200 pb-4">
-                    <h3 className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight text-slate-900">Solicitud enviada</h3>
-                    <p className="mt-1 text-sm text-slate-600">Por favor revisar su correo electrónico para continuar con el proceso de recuperación.</p>
+                    <div className={`mb-5 border-b pb-4 ${ isError ? 'border-red-200' : 'border-slate-200' }`}>
+                    <h3 className={`font-['Space_Grotesk'] text-2xl font-bold tracking-tight ${isError ? 'text-red-600' : 'text-slate-900'}`}>
+                        {isError ? 'Error' : 'Solicitud enviada'}
+                    </h3>
+                    <p className={`mt-1 text-sm ${isError ? 'text-red-600' : 'text-slate-600'}`}>{modalMessage}</p>
                     </div>
                     <div className="mt-7 flex justify-end">
                     <button
                         type="button"
                         onClick={() => setIsModalOpen(false)}
-                        className="rounded-lg bg-blue-700 px-5 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-white transition hover:bg-blue-800"
+                        className={`rounded-lg px-5 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-white transition ${
+                            isError ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-700 hover:bg-blue-800'
+                        }`}
                     >
                         Cerrar
                     </button>
