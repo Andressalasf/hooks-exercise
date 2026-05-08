@@ -76,18 +76,20 @@ const NavItem = ({ icon, label, to }) => (
 
 // ── Avatar 
 
-const Avatar = ({ user, size = 'md' }) => {
+const Avatar = ({ user, photoURL: explicitPhoto, size = 'md' }) => {
   const initial = (user?.displayName || user?.email || '?')[0].toUpperCase();
   const sizeClasses = size === 'lg'
     ? 'h-24 w-24 text-3xl border-4'
     : 'h-8 w-8 text-sm border-2';
+  const photoURL = explicitPhoto || user?.photoURL || null;
 
-  if (user?.photoURL) {
+  if (photoURL) {
     return (
       <img
-        alt={user.displayName || 'Avatar'}
+        alt={user?.displayName || 'Avatar'}
         className={`${sizeClasses} rounded-full border-white object-cover shadow-sm`}
-        src={user.photoURL}
+        src={photoURL}
+        onError={(e) => { e.currentTarget.style.display = 'none'; }}
       />
     );
   }
@@ -106,13 +108,18 @@ const DashboardPage = () => {
   const [user, setUser] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [codigoEstudiante, setCodigoEstudiante] = useState('');
+  const [storedPhotoURL, setStoredPhotoURL] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         const snap = await getDoc(doc(db, 'usuarios_registrados', currentUser.uid));
-        if (snap.exists()) setCodigoEstudiante(snap.data().codigo ?? '');
+        if (snap.exists()) {
+          const data = snap.data();
+          setCodigoEstudiante(data.codigo ?? '');
+          setStoredPhotoURL(data.photoURL ?? null);
+        }
       } else {
         navigate('/login');
       }
@@ -166,7 +173,7 @@ const DashboardPage = () => {
           </button>
           <div className="flex items-center gap-2">
             <div className="relative rounded-full p-0.5 bg-gradient-to-tr from-blue-700 to-blue-400">
-              <Avatar user={user} size="sm" />
+              <Avatar user={user} photoURL={storedPhotoURL} size="sm" />
             </div>
             <div className="hidden lg:flex lg:flex-col">
               <span className="font-['Space_Grotesk'] text-sm font-bold leading-tight text-slate-900">{displayName}</span>
@@ -175,6 +182,15 @@ const DashboardPage = () => {
               </span>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 font-['Space_Grotesk'] text-xs font-bold text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <LogoutIcon />
+            {isLoggingOut ? '...' : 'Salir'}
+          </button>
         </div>
       </header>
 
@@ -231,7 +247,7 @@ const DashboardPage = () => {
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent" />
 
               <div className="relative rounded-full p-1 bg-gradient-to-tr from-blue-700 to-blue-400">
-                <Avatar user={user} size="lg" />
+                <Avatar user={user} photoURL={storedPhotoURL} size="lg" />
               </div>
 
               <div>

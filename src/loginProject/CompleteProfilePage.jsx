@@ -66,6 +66,7 @@ const CompleteProfilePage = () => {
         nombre: formData.nombre,
         apellido: formData.apellido,
         codigo: formData.codigo,
+        photoURL: user.photoURL || null,
       });
       await updateActiveSessionsCodigo(user.uid, formData.codigo);
       navigate('/dashboard');
