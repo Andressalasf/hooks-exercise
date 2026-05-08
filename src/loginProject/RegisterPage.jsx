@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { registerUserInFirestore } from './registerService';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +12,9 @@ const RegisterPage = () => {
     confirmPassword: ''
   });
   const [errors, setErrors] = useState({});
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const validateForm = () => {
     const newErrors = {};
@@ -79,15 +82,24 @@ const RegisterPage = () => {
     });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    setSubmitError('');
+    setSuccessMessage('');
+
     const validationErrors = validateForm();
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      setIsModalOpen(true);
-    } else {
-      setIsModalOpen(false);
+      try {
+        setIsSubmitting(true);
+        await registerUserInFirestore(formData);
+        setSuccessMessage('Cuenta creada correctamente.');
+      } catch (error) {
+        setSubmitError(error.message || 'No se pudo completar el registro.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -261,10 +273,14 @@ const RegisterPage = () => {
 
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-blue-700 to-blue-500 py-3.5 font-['Space_Grotesk'] text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.99]"
               >
-                Registrarse
+                {isSubmitting ? 'Registrando cuenta...' : 'Registrarse'}
               </button>
+
+              {submitError && <p className="text-sm font-medium text-red-600">{submitError}</p>}
+              {successMessage && <p className="text-sm font-medium text-emerald-700">{successMessage}</p>}
             </form>
 
             <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-5 text-sm text-slate-600 md:flex-row">
@@ -277,35 +293,6 @@ const RegisterPage = () => {
         </section>
       </main>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/45 px-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-7 shadow-2xl md:p-8">
-            <div className="mb-5 border-b border-slate-200 pb-4">
-              <h3 className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight text-slate-900">Datos registrados</h3>
-              <p className="mt-1 text-sm text-slate-600">Formulario válido.</p>
-            </div>
-
-            <div className="space-y-3 text-sm text-slate-700">
-              <p><span className="font-semibold text-slate-900">Nombre:</span> {formData.nombre}</p>
-              <p><span className="font-semibold text-slate-900">Apellido:</span> {formData.apellido}</p>
-              <p><span className="font-semibold text-slate-900">Codigo:</span> {formData.codigo}</p>
-              <p><span className="font-semibold text-slate-900">Correo electronico:</span> {formData.email}</p>
-              <p><span className="font-semibold text-slate-900">Contraseña:</span> {formData.password}</p>
-              <p><span className="font-semibold text-slate-900">Confirmar contraseña:</span> {formData.confirmPassword}</p>
-            </div>
-
-            <div className="mt-7 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-lg bg-blue-700 px-5 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-white transition hover:bg-blue-800"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
