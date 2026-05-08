@@ -66,7 +66,20 @@ export const googleUserExistsInFirestore = async (uid) => {
   return snap.exists();
 };
 
-export const saveGoogleUserToFirestore = async ({ uid, email, nombre, apellido, codigo }) => {
+export const updateUserPhotoURL = async (uid, photoURL) => {
+  if (!hasFirebaseConfig || !db || !photoURL) return;
+  try {
+    const userRef = doc(db, USERS_COLLECTION, uid);
+    const snap = await getDoc(userRef);
+    if (snap.exists()) {
+      await updateDoc(userRef, { photoURL });
+    }
+  } catch (error) {
+    console.error('Error al actualizar photoURL:', error.message);
+  }
+};
+
+export const saveGoogleUserToFirestore = async ({ uid, email, nombre, apellido, codigo, photoURL = null }) => {
   if (!hasFirebaseConfig || !db) {
     throw new Error('La configuracion del proyecto no es valida.');
   }
@@ -77,6 +90,7 @@ export const saveGoogleUserToFirestore = async ({ uid, email, nombre, apellido, 
     apellido: normalizeString(apellido),
     codigo: normalizeString(codigo),
     email,
+    photoURL: photoURL || null,
     createdAt: serverTimestamp(),
   };
 

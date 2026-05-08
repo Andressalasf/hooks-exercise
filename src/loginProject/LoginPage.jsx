@@ -11,7 +11,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { auth, googleProvider, githubProvider, facebookProvider, hasFirebaseConfig } from '../firebase/firebaseConfig';
-import { googleUserExistsInFirestore, createSessionRecord } from './registerService';
+import { googleUserExistsInFirestore, createSessionRecord, updateUserPhotoURL } from './registerService';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -113,7 +113,7 @@ const LoginPage = () => {
     setAuthError(`Este correo ya está registrado. Inicia sesión con ${methodsText} y luego vincularemos ${providerName}.`);
   };
 
-  const finishLogin = async (user, method) => {
+  const finishLogin = async (user, method, providerPhotoURL = null) => {
     const shouldLinkPendingCredential = pendingCredential && pendingEmail && user?.email && user.email.toLowerCase() === pendingEmail.toLowerCase();
 
     if (pendingCredential && !shouldLinkPendingCredential) {
@@ -134,6 +134,11 @@ const LoginPage = () => {
           setAuthError('Se inició sesión, pero no se pudo vincular la otra credencial.');
         }
       }
+    }
+
+    const resolvedPhoto = user.photoURL || providerPhotoURL || null;
+    if (resolvedPhoto) {
+      await updateUserPhotoURL(user.uid, resolvedPhoto).catch(() => {});
     }
 
     try {
@@ -191,8 +196,16 @@ const LoginPage = () => {
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
 
-      const { user } = await signInWithPopup(auth, provider);
-      await finishLogin(user, sessionMethod);
+      const result = await signInWithPopup(auth, provider);
+      const { user } = result;
+      const profile = result.additionalUserInfo?.profile;
+      const providerPhoto =
+        profile?.avatar_url ||                    // GitHub
+        profile?.picture?.data?.url ||            // Facebook (graph API)
+        (typeof profile?.picture === 'string' ? profile.picture : null) || // Facebook (string URL)
+        user.photoURL ||
+        null;
+      await finishLogin(user, sessionMethod, providerPhoto);
     } catch (error) {
       const dismissed = error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request';
 
