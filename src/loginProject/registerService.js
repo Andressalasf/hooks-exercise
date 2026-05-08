@@ -151,9 +151,15 @@ export const updateSessionExit = async (sessionId, exitTime) => {
   }
 
   try {
-    await updateDoc(doc(db, SESSIONS_COLLECTION, sessionId), {
+    const sessionRef = doc(db, SESSIONS_COLLECTION, sessionId);
+    const snap = await getDoc(sessionRef);
+    const entryTime = snap.exists() ? (snap.data().entryTime ?? null) : null;
+    const duration = entryTime !== null ? exitTime - entryTime : null;
+
+    await updateDoc(sessionRef, {
       exitTime,
       status: 'finalizado',
+      duration,
       updatedAt: serverTimestamp(),
     });
   } catch (error) {

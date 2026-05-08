@@ -148,7 +148,7 @@ const LoginPage = () => {
     }
 
     const exists = await googleUserExistsInFirestore(user.uid);
-    navigate(exists ? '/dashboard' : '/complete-profile');
+    navigate(exists ? '/dashboard' : '/complete-profile', { state: { photoURL: resolvedPhoto } });
   };
 
   const handleSubmit = async (event) => {
