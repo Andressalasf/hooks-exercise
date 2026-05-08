@@ -212,10 +212,8 @@ const UserHistoryPage = () => {
     try {
       // Finalizar la sesión activa del usuario actual
       if (user) {
-        const activeSession = sessions.find(s => s.uid === user.uid && s.status === 'activo');
-        if (activeSession) {
-          await updateSessionExit(activeSession.id, Date.now());
-        }
+        const activeSessions = sessions.filter((s) => s.uid === user.uid && s.status === 'activo');
+        await Promise.all(activeSessions.map((s) => updateSessionExit(s.id, Date.now())));
       }
     } catch (error) {
       console.error('Error al finalizar sesión:', error);

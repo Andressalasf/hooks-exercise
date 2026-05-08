@@ -147,6 +147,19 @@ export const updateSessionExit = async (sessionId, exitTime) => {
   }
 };
 
+export const updateActiveSessionsCodigo = async (uid, codigo) => {
+  if (!hasFirebaseConfig || !db) return;
+  try {
+    const sessions = await getSessionsHistory();
+    const active = sessions.filter((s) => s.uid === uid && s.status === 'activo');
+    await Promise.all(
+      active.map((s) => updateDoc(doc(db, SESSIONS_COLLECTION, s.id), { codigo }))
+    );
+  } catch (error) {
+    console.error('Error al actualizar codigo en sesiones activas:', error.message);
+  }
+};
+
 export const finalizeLatestActiveSession = async (uid, exitTime) => {
   if (!hasFirebaseConfig || !db) {
     throw new Error('La configuracion del proyecto no es valida.');
@@ -165,24 +178,25 @@ export const finalizeLatestActiveSession = async (uid, exitTime) => {
   }
 };
 
-export const createSessionRecord = async (uid, method) => {
+export const createSessionRecord = async (uid, method, authUser = null) => {
   if (!hasFirebaseConfig || !db) {
     throw new Error('La configuracion del proyecto no es valida.');
   }
 
   try {
-    // Obtener datos del usuario registrado
     const userSnap = await getDoc(doc(db, USERS_COLLECTION, uid));
-    
+
     let userData;
     if (userSnap.exists()) {
       userData = userSnap.data();
     } else {
-      // Si el usuario no existe aún, crear sesión con datos mínimos
+      // Usuario nuevo por OAuth: usar datos de Firebase Auth como fallback
+      const displayName = authUser?.displayName?.trim() || '';
+      const parts = displayName.split(' ');
       userData = {
-        nombre: 'Usuario',
-        apellido: 'Nuevo',
-        email: uid,
+        nombre: parts[0] || 'Usuario',
+        apellido: parts.slice(1).join(' ') || '',
+        email: authUser?.email || uid,
         codigo: '',
       };
     }
