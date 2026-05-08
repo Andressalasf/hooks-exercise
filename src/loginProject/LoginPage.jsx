@@ -137,7 +137,7 @@ const LoginPage = () => {
     }
 
     try {
-      await createSessionRecord(user.uid, method);
+      await createSessionRecord(user.uid, method, user);
     } catch (sessionError) {
       console.error('Error al registrar sesión:', sessionError.message);
     }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase/firebaseConfig';
-import { saveGoogleUserToFirestore } from './registerService';
+import { saveGoogleUserToFirestore, updateActiveSessionsCodigo } from './registerService';
 
 const CompleteProfilePage = () => {
   const navigate = useNavigate();
@@ -67,6 +67,7 @@ const CompleteProfilePage = () => {
         apellido: formData.apellido,
         codigo: formData.codigo,
       });
+      await updateActiveSessionsCodigo(user.uid, formData.codigo);
       navigate('/dashboard');
     } catch (error) {
       setSubmitError(error.message || 'No se pudo guardar el perfil.');

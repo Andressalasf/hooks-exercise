@@ -126,11 +126,8 @@ const DashboardPage = () => {
       // Finalizar la sesión activa del usuario usando el mismo patrón que el historial
       if (user) {
         const sessions = await getSessionsHistory();
-        const activeSession = sessions.find((session) => session.uid === user.uid && session.status === 'activo');
-
-        if (activeSession) {
-          await updateSessionExit(activeSession.id, Date.now());
-        }
+        const activeSessions = sessions.filter((s) => s.uid === user.uid && s.status === 'activo');
+        await Promise.all(activeSessions.map((s) => updateSessionExit(s.id, Date.now())));
       }
 
       await signOut(auth);
