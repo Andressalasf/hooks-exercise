@@ -239,6 +239,17 @@ const UserHistoryPage = () => {
     return `${day}/${month}/${year} ${time}`;
   };
 
+  const formatDuration = (ms) => {
+    if (!ms || ms <= 0) return 'N/D';
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m ${seconds}s`;
+    return `${seconds}s`;
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#f6f8fc] text-slate-900 selection:bg-blue-200">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -429,7 +440,7 @@ const UserHistoryPage = () => {
                 <span>Usuario</span>
                 <span>Método</span>
                 <span>Correo y código</span>
-                <span>Horario</span>
+                <span>Horario / Duración</span>
               </div>
 
               <div className="divide-y divide-blue-50">
@@ -470,6 +481,9 @@ const UserHistoryPage = () => {
                         </p>
                         <p className="truncate font-['Space_Grotesk'] text-sm font-bold text-blue-500">
                           Salida {formatDateTime(session.exitTime)}
+                        </p>
+                        <p className="truncate font-['Space_Grotesk'] text-xs font-semibold text-slate-400">
+                          Duración: {session.status === 'activo' ? 'En curso' : formatDuration(session.duration)}
                         </p>
                       </div>
                     </div>

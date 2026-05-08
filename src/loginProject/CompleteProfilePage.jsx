@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { auth } from '../firebase/firebaseConfig';
 import { saveGoogleUserToFirestore, updateActiveSessionsCodigo } from './registerService';
 
 const CompleteProfilePage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({ nombre: '', apellido: '', codigo: '' });
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
@@ -66,7 +67,7 @@ const CompleteProfilePage = () => {
         nombre: formData.nombre,
         apellido: formData.apellido,
         codigo: formData.codigo,
-        photoURL: user.photoURL || null,
+        photoURL: location.state?.photoURL || user.photoURL || null,
       });
       await updateActiveSessionsCodigo(user.uid, formData.codigo);
       navigate('/dashboard');
