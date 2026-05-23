@@ -19,6 +19,12 @@ const TrophyIcon = () => (
   </svg>
 );
 
+const TournamentIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M7 4h10v3a5 5 0 01-3 4.58V13a2 2 0 002 2h1a3 3 0 013 3v2H4v-2a3 3 0 013-3h1a2 2 0 002-2v-1.42A5 5 0 017 7V4zM9 4v2a3 3 0 006 0V4" />
+  </svg>
+);
+
 const LeaderboardIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -214,6 +220,7 @@ const DashboardPage = () => {
             Inicio
           </div>
           <NavItem icon={<TrophyIcon />} label="Retos Diarios" to="#" />
+          <NavItem icon={<TournamentIcon />} label="Torneos" to="/dashboard/torneos" />
           <NavItem icon={<LeaderboardIcon />} label="Rankings" to="#" />
           <NavItem icon={<HistoryIcon />} label="Usuarios" to="/historial-usuarios" />
           <NavItem icon={<CodeIcon />} label="Hooks Playground" to="/playground" />
