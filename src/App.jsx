@@ -25,6 +25,7 @@ import UserHistoryPage from './loginProject/UserHistoryPage';
 import RecoverPage from './loginProject/RecoverPage';
 import ResetPage from './loginProject/ResetPage';
 import CompleteProfilePage from './loginProject/CompleteProfilePage';
+import TournamentsPage from './loginProject/TournamentsPage';
 import './App.css';
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/dashboard/torneos" element={<TournamentsPage />} />
         <Route path="/historial-usuarios" element={<UserHistoryPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/recover" element={<RecoverPage />} />

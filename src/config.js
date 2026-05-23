@@ -1,0 +1,1 @@
+export const ADMIN_EMAILS = ['afsalasn@ufpso.edu.co', 'acastilla@ufpso.edu.co', 'jaquinterocl@ufpso.edu.co'];
