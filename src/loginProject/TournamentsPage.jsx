@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore';
 import { auth, db, hasFirebaseConfig } from '../firebase/firebaseConfig';
 import { ADMIN_EMAILS } from '../config';
 
@@ -172,6 +172,17 @@ const formatDate = (value) => {
 
 const normalizeEmail = (value) => value?.trim().toLowerCase() || '';
 
+const createInitialTournamentForm = () => ({
+  title: '',
+  description: '',
+  rules: '',
+  location: '',
+  registrationDeadline: '',
+  startDate: '',
+  endDate: '',
+  maxTeams: '',
+});
+
 const getRegisteredTeamsCount = (tournament) => (Array.isArray(tournament?.registeredTeams) ? tournament.registeredTeams.length : 0);
 
 const getMaxTeamsValue = (tournament) => {
@@ -211,6 +222,11 @@ const TournamentsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isSavingTournament, setIsSavingTournament] = useState(false);
+  const [formData, setFormData] = useState(createInitialTournamentForm);
+  const [formErrors, setFormErrors] = useState({});
+  const [formMessage, setFormMessage] = useState('');
 
   const currentEmail = normalizeEmail(currentUser?.email);
   const isAdmin = Boolean(currentEmail && ADMIN_EMAILS.some((email) => normalizeEmail(email) === currentEmail));
@@ -258,6 +274,149 @@ const TournamentsPage = () => {
       console.error('Error al cerrar sesión:', logoutError);
     } finally {
       setIsLoggingOut(false);
+    }
+  };
+
+  const handleCreateToggle = () => {
+    setShowCreateForm((currentValue) => !currentValue);
+    setFormMessage('');
+    setFormErrors({});
+  };
+
+  const handleCreateCancel = () => {
+    setShowCreateForm(false);
+    setFormData(createInitialTournamentForm());
+    setFormErrors({});
+    setFormMessage('');
+  };
+
+  const handleTournamentFieldChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((currentValue) => ({
+      ...currentValue,
+      [name]: value,
+    }));
+
+    setFormErrors((currentErrors) => {
+      if (!currentErrors[name]) return currentErrors;
+
+      const nextErrors = { ...currentErrors };
+      delete nextErrors[name];
+      return nextErrors;
+    });
+
+    setFormMessage('');
+  };
+
+  const validateTournamentForm = () => {
+    const nextErrors = {};
+    const requiredFields = [
+      'title',
+      'description',
+      'rules',
+      'location',
+      'registrationDeadline',
+      'startDate',
+      'endDate',
+      'maxTeams',
+    ];
+
+    requiredFields.forEach((fieldName) => {
+      if (!formData[fieldName]?.toString().trim()) {
+        nextErrors[fieldName] = 'Este campo es obligatorio.';
+      }
+    });
+
+    const startDate = formData.startDate ? new Date(formData.startDate) : null;
+    const endDate = formData.endDate ? new Date(formData.endDate) : null;
+    const registrationDeadline = formData.registrationDeadline ? new Date(formData.registrationDeadline) : null;
+    const maxTeamsValue = Number(formData.maxTeams);
+
+    if (startDate && endDate && startDate.getTime() >= endDate.getTime()) {
+      nextErrors.startDate = 'La fecha de inicio debe ser anterior a la fecha de fin.';
+      nextErrors.endDate = 'La fecha de fin debe ser posterior a la fecha de inicio.';
+    }
+
+    if (registrationDeadline && startDate && registrationDeadline.getTime() >= startDate.getTime()) {
+      nextErrors.registrationDeadline = 'La inscripción debe cerrar antes del inicio del torneo.';
+    }
+
+    if (!Number.isInteger(maxTeamsValue) || maxTeamsValue <= 0) {
+      nextErrors.maxTeams = 'El cupo máximo debe ser un número entero mayor a 0.';
+    }
+
+    return nextErrors;
+  };
+
+  const handleCreateTournament = async (event) => {
+    event.preventDefault();
+
+    const validationErrors = validateTournamentForm();
+    setFormErrors(validationErrors);
+    setFormMessage('');
+
+    if (Object.keys(validationErrors).length > 0) {
+      setFormMessage('Corrige los campos marcados para continuar.');
+      return;
+    }
+
+    if (!hasFirebaseConfig || !db) {
+      setFormMessage('Configura Firebase antes de guardar el torneo.');
+      return;
+    }
+
+    setIsSavingTournament(true);
+
+    try {
+      const tournamentPayload = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        rules: formData.rules.trim(),
+        location: formData.location.trim(),
+        registrationDeadline: new Date(formData.registrationDeadline).toISOString(),
+        startDate: new Date(formData.startDate).toISOString(),
+        endDate: new Date(formData.endDate).toISOString(),
+        status: 'active',
+        maxTeams: Number(formData.maxTeams),
+        registeredTeams: [],
+        createdBy: currentUser?.email || '',
+        createdAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, 'tournaments'), tournamentPayload);
+
+      setFormData(createInitialTournamentForm());
+      setFormErrors({});
+      setFormMessage('');
+      setShowCreateForm(false);
+      setError('');
+      setLoading(true);
+
+      const tournamentsRef = collection(db, 'tournaments');
+      const tournamentsQuery = isAdmin
+        ? tournamentsRef
+        : query(tournamentsRef, where('status', '==', 'active'));
+
+      const snapshot = await getDocs(tournamentsQuery);
+      const items = snapshot.docs
+        .map((document) => ({ id: document.id, ...document.data() }))
+        .sort((left, right) => {
+          const leftDate = new Date(left.startDate || 0).getTime();
+          const rightDate = new Date(right.startDate || 0).getTime();
+          return leftDate - rightDate;
+        });
+
+      setTournaments(items);
+    } catch (saveError) {
+      console.error('Error al crear torneo:', saveError);
+      if (saveError?.code === 'permission-denied') {
+        setFormMessage('Firestore bloqueó la creación. Verifica las reglas y que tu correo esté como administrador.');
+      } else {
+        setFormMessage('No fue posible guardar el torneo. Intenta de nuevo.');
+      }
+    } finally {
+      setLoading(false);
+      setIsSavingTournament(false);
     }
   };
 
@@ -414,14 +573,190 @@ const TournamentsPage = () => {
             {isAdmin ? (
               <button
                 type="button"
+                onClick={handleCreateToggle}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
               >
                 <PlusIcon />
-                Crear Torneo
+                {showCreateForm ? 'Cerrar formulario' : 'Crear Torneo'}
               </button>
             ) : null}
           </div>
         </div>
+
+        {isAdmin && showCreateForm ? (
+          <div className="mb-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <div className="border-b border-slate-100 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 px-6 py-5 text-white sm:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-100">Nuevo torneo</p>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight">Formulario de creación</h2>
+              <p className="mt-2 max-w-2xl text-sm text-slate-200">
+                Completa los datos del torneo. El registro se guardará en Firestore con estado inicial activo y sin equipos inscritos.
+              </p>
+            </div>
+
+            <form onSubmit={handleCreateTournament} className="space-y-6 p-6 sm:p-8">
+              {formMessage ? (
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                  {formMessage}
+                </div>
+              ) : null}
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="title">
+                    Título
+                  </label>
+                  <input
+                    id="title"
+                    name="title"
+                    type="text"
+                    value={formData.title}
+                    onChange={handleTournamentFieldChange}
+                    aria-invalid={Boolean(formErrors.title)}
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-4 ${formErrors.title ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-100'}`}
+                    placeholder="Torneo Interno UFPSO - Semestre I"
+                  />
+                  {formErrors.title ? <p className="mt-2 text-xs font-medium text-rose-600">{formErrors.title}</p> : null}
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="description">
+                    Descripción
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows="4"
+                    value={formData.description}
+                    onChange={handleTournamentFieldChange}
+                    aria-invalid={Boolean(formErrors.description)}
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-4 ${formErrors.description ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-100'}`}
+                    placeholder="Competencia enfocada en algoritmos sobre grafos y optimización."
+                  />
+                  {formErrors.description ? <p className="mt-2 text-xs font-medium text-rose-600">{formErrors.description}</p> : null}
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="rules">
+                    Reglas
+                  </label>
+                  <textarea
+                    id="rules"
+                    name="rules"
+                    rows="4"
+                    value={formData.rules}
+                    onChange={handleTournamentFieldChange}
+                    aria-invalid={Boolean(formErrors.rules)}
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-4 ${formErrors.rules ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-100'}`}
+                    placeholder="Formato ICPC. Se permite material impreso. Lenguajes: C++, Java, Python."
+                  />
+                  {formErrors.rules ? <p className="mt-2 text-xs font-medium text-rose-600">{formErrors.rules}</p> : null}
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="location">
+                    Ubicación
+                  </label>
+                  <input
+                    id="location"
+                    name="location"
+                    type="text"
+                    value={formData.location}
+                    onChange={handleTournamentFieldChange}
+                    aria-invalid={Boolean(formErrors.location)}
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-4 ${formErrors.location ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-100'}`}
+                    placeholder="Laboratorio de Sistemas 3 - UFPSO"
+                  />
+                  {formErrors.location ? <p className="mt-2 text-xs font-medium text-rose-600">{formErrors.location}</p> : null}
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="maxTeams">
+                    Cupo máximo
+                  </label>
+                  <input
+                    id="maxTeams"
+                    name="maxTeams"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={formData.maxTeams}
+                    onChange={handleTournamentFieldChange}
+                    aria-invalid={Boolean(formErrors.maxTeams)}
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-4 ${formErrors.maxTeams ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-100'}`}
+                    placeholder="20"
+                  />
+                  {formErrors.maxTeams ? <p className="mt-2 text-xs font-medium text-rose-600">{formErrors.maxTeams}</p> : null}
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="registrationDeadline">
+                    Fecha de inscripción
+                  </label>
+                  <input
+                    id="registrationDeadline"
+                    name="registrationDeadline"
+                    type="datetime-local"
+                    value={formData.registrationDeadline}
+                    onChange={handleTournamentFieldChange}
+                    aria-invalid={Boolean(formErrors.registrationDeadline)}
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-4 ${formErrors.registrationDeadline ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-100'}`}
+                  />
+                  {formErrors.registrationDeadline ? <p className="mt-2 text-xs font-medium text-rose-600">{formErrors.registrationDeadline}</p> : null}
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="startDate">
+                    Fecha de inicio
+                  </label>
+                  <input
+                    id="startDate"
+                    name="startDate"
+                    type="datetime-local"
+                    value={formData.startDate}
+                    onChange={handleTournamentFieldChange}
+                    aria-invalid={Boolean(formErrors.startDate)}
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-4 ${formErrors.startDate ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-100'}`}
+                  />
+                  {formErrors.startDate ? <p className="mt-2 text-xs font-medium text-rose-600">{formErrors.startDate}</p> : null}
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="endDate">
+                    Fecha de fin
+                  </label>
+                  <input
+                    id="endDate"
+                    name="endDate"
+                    type="datetime-local"
+                    value={formData.endDate}
+                    onChange={handleTournamentFieldChange}
+                    aria-invalid={Boolean(formErrors.endDate)}
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-4 ${formErrors.endDate ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-100'}`}
+                  />
+                  {formErrors.endDate ? <p className="mt-2 text-xs font-medium text-rose-600">{formErrors.endDate}</p> : null}
+                </div>
+              </div>
+
+              <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={handleCreateCancel}
+                  className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingTournament}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <PlusIcon />
+                  {isSavingTournament ? 'Guardando...' : 'Guardar torneo'}
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : null}
 
         {isAdmin ? (
           <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
