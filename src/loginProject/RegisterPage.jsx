@@ -107,7 +107,7 @@ const RegisterPage = () => {
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-200">
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-slate-50/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
-          <p className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight">CODECOMP</p>
+          <Link to="/" className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight hover:opacity-80 transition-opacity">CODECOMP</Link>
           <div className="flex items-center gap-3">
             <Link
               to="/login"
