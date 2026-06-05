@@ -25,6 +25,7 @@ import UserHistoryPage from './loginProject/UserHistoryPage';
 import RecoverPage from './loginProject/RecoverPage';
 import ResetPage from './loginProject/ResetPage';
 import CompleteProfilePage from './loginProject/CompleteProfilePage';
+import DailyChallengesPage from './loginProject/DailyChallengesPage';
 import TournamentsPage from './loginProject/TournamentsPage';
 import GruposPage from './loginProject/GruposPage';
 import HomePage from './loginProject/HomePage';
@@ -37,6 +38,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/dashboard/retos" element={<DailyChallengesPage />} />
         <Route path="/dashboard/torneos" element={<TournamentsPage />} />
         <Route path="/dashboard/grupos"  element={<GruposPage />} />
         <Route path="/historial-usuarios" element={<UserHistoryPage />} />

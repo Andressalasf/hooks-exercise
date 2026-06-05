@@ -924,7 +924,7 @@ const TournamentsPage = () => {
 
         <div className="flex flex-1 flex-col gap-1">
           <NavItem icon={<HomeIcon />} label="Inicio" to="/dashboard" />
-          <NavItem icon={<TrophyIcon />} label="Retos Diarios" to="#" />
+          <NavItem icon={<TrophyIcon />} label="Retos Diarios" to="/dashboard/retos" />
           <NavItem icon={<TournamentIcon />} label="Torneos" to="/dashboard/torneos" active />
           <NavItem icon={<GruposIcon />} label="Grupos" to="/dashboard/grupos" />
           <NavItem icon={<LeaderboardIcon />} label="Rankings" to="#" />
