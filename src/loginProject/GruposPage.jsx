@@ -161,6 +161,27 @@ const GruposPage = () => {
 
   const searchRefs = useRef([]);
 
+  const loadData = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      const g = await getGrupos();
+      setGrupos(g);
+    } catch (e) { console.error('[grupos]', e.code, e.message); }
+
+    try {
+      const t = await getDocs(query(collection(db, 'tournaments'), orderBy('createdAt', 'desc')));
+      setTorneos(t.docs.map(d => ({ id: d.id, ...d.data() })));
+    } catch (e) { console.error('[tournaments]', e.code, e.message); }
+
+    try {
+      const u = await getDocs(collection(db, 'usuarios_registrados'));
+      setTodosUsuarios(u.docs.map(d => ({ id: d.id, ...d.data() })));
+    } catch (e) { console.error('[usuarios]', e.code, e.message); }
+
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (cu) => {
       if (!cu) { navigate('/login'); return; }
@@ -173,27 +194,10 @@ const GruposPage = () => {
         setCodigo(snap.data().codigo ?? '');
         setPhotoURL(snap.data().photoURL ?? null);
       }
+      await loadData();
     });
     return () => unsub();
-  }, [navigate]);
-
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [gSnap, tSnap, uSnap] = await Promise.all([
-        getGrupos(),
-        getDocs(query(collection(db, 'tournaments'), orderBy('createdAt', 'desc'))),
-        getDocs(collection(db, 'usuarios_registrados')),
-      ]);
-      setGrupos(gSnap);
-      setTorneos(tSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setTodosUsuarios(uSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { loadData(); }, [loadData]);
+  }, [navigate, loadData]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -227,18 +231,18 @@ const GruposPage = () => {
   const closeForm = () => { setShowForm(false); setEditingId(null); setFormError(''); };
 
   const getResultados = (busqueda, slotIdx) => {
-    if (!busqueda.trim()) return [];
-    const lower = busqueda.toLowerCase();
+    const lower = busqueda.toLowerCase().trim();
     const usedCodigos = form.miembros
       .filter((m, i) => i !== slotIdx && m.usuario)
       .map(m => m.usuario.codigo);
     return todosUsuarios
       .filter(u => {
         const full = `${u.nombre ?? ''} ${u.apellido ?? ''}`.toLowerCase();
-        const match = full.includes(lower) || (u.codigo ?? '').includes(busqueda);
+        const cod  = (u.codigo ?? '').toLowerCase();
+        const match = !lower || full.includes(lower) || cod.includes(lower);
         return match && !usedCodigos.includes(u.codigo);
       })
-      .slice(0, 7);
+      .slice(0, 8);
   };
 
   const updateBusqueda = (slotIdx, val) => {
@@ -576,9 +580,9 @@ const GruposPage = () => {
                     const role   = ROLES[idx];
                     const results = getResultados(slot.busqueda, idx);
                     return (
-                      <div key={role.value} className={`rounded-xl border p-4 ${slot.usuario ? 'border-slate-200 bg-slate-50' : 'border-slate-200 bg-white'}`}>
+                      <div key={role.value} className="rounded-xl border border-slate-300 bg-white p-4">
                         <div className="mb-3 flex items-center gap-2">
-                          <span className={`rounded-full border px-2.5 py-0.5 font-['Space_Grotesk'] text-[11px] font-bold uppercase tracking-wide ${role.color}`}>
+                          <span className="rounded-full border border-slate-300 bg-white px-2.5 py-0.5 font-['Space_Grotesk'] text-[11px] font-bold uppercase tracking-wide text-slate-600">
                             {role.label}
                           </span>
                         </div>
