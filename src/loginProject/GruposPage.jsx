@@ -128,10 +128,14 @@ const Avatar = ({ user, photoURL, size = 'sm' }) => {
 };
 
 const MemberAvatar = ({ miembro, size = 'sm' }) => {
+  const [imgErr, setImgErr] = useState(false);
   const initial = `${miembro.nombre?.[0] ?? '?'}`.toUpperCase();
   const sz = size === 'lg' ? 'h-10 w-10 text-base' : 'h-8 w-8 text-sm';
-  if (miembro.photoURL) return <img alt={miembro.nombre} className={`${sz} rounded-full object-cover`} src={miembro.photoURL} />;
-  return <div className={`${sz} flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-400 font-bold text-white`}>{initial}</div>;
+  const fallback = <div className={`${sz} flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-400 font-bold text-white`}>{initial}</div>;
+  if (miembro.photoURL && !imgErr) {
+    return <img alt={miembro.nombre} className={`${sz} rounded-full object-cover`} src={miembro.photoURL} onError={() => setImgErr(true)} />;
+  }
+  return fallback;
 };
 
 const GruposPage = () => {
@@ -276,6 +280,20 @@ const GruposPage = () => {
       return 'El nombre del grupo debe tener al menos 3 caracteres.';
     if (!form.torneoId)
       return 'Selecciona un torneo para el grupo.';
+
+    const torneo = torneos.find(t => t.id === form.torneoId);
+    if (torneo?.status === 'cancelled')
+      return 'No puedes crear un grupo en un torneo cancelado.';
+    if (torneo?.status === 'completed')
+      return 'No puedes crear un grupo en un torneo ya finalizado.';
+    if (torneo?.registrationDeadline) {
+      const deadline = torneo.registrationDeadline.toDate
+        ? torneo.registrationDeadline.toDate()
+        : new Date(torneo.registrationDeadline);
+      if (deadline < new Date())
+        return 'El período de inscripción de este torneo ya cerró.';
+    }
+
     if (form.miembros.some(m => !m.usuario))
       return 'Debes seleccionar los 3 integrantes del grupo.';
     const codigos = form.miembros.map(m => m.usuario.codigo);
@@ -287,6 +305,33 @@ const GruposPage = () => {
   const handleSave = async () => {
     const err = validate();
     if (err) { setFormError(err); return; }
+
+    const codigosNuevos = form.miembros.map(m => m.usuario.codigo);
+    const gruposDelTorneo = grupos.filter(g => g.torneoId === form.torneoId && g.id !== editingId);
+
+    const torneo = torneos.find(t => t.id === form.torneoId);
+    if (torneo?.maxTeams && gruposDelTorneo.length >= Number(torneo.maxTeams)) {
+      setFormError(`El torneo "${torneo.title}" ya alcanzó su capacidad máxima de ${torneo.maxTeams} grupos.`);
+      return;
+    }
+
+    const nombreNuevo = form.nombre.trim().toLowerCase();
+    const nombreDup = gruposDelTorneo.find(g => g.nombre?.trim().toLowerCase() === nombreNuevo);
+    if (nombreDup) {
+      setFormError(`Ya existe un grupo llamado "${form.nombre.trim()}" en este torneo.`);
+      return;
+    }
+
+    for (const g of gruposDelTorneo) {
+      const codigosExistentes = (g.miembros ?? []).map(m => m.codigo);
+      const dup = codigosNuevos.find(c => codigosExistentes.includes(c));
+      if (dup) {
+        const miembro = (g.miembros ?? []).find(m => m.codigo === dup);
+        setFormError(`${miembro?.nombre ?? 'Un integrante'} ${miembro?.apellido ?? ''} (${dup}) ya pertenece al grupo "${g.nombre}" en este torneo.`);
+        return;
+      }
+    }
+
     setSaving(true);
     setFormError('');
     try {
@@ -565,9 +610,11 @@ const GruposPage = () => {
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 font-['Inter'] text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
                   >
                     <option value="">Selecciona un torneo...</option>
-                    {torneos.map(t => (
-                      <option key={t.id} value={t.id}>{t.title}</option>
-                    ))}
+                    {torneos
+                      .filter(t => t.status === 'active' || t.status === 'draft')
+                      .map(t => (
+                        <option key={t.id} value={t.id}>{t.title}</option>
+                      ))}
                   </select>
                 </div>
 
