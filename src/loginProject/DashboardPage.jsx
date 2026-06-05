@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
+import { ADMIN_EMAILS } from '../config';
 import { auth, db } from '../firebase/firebaseConfig';
 import { getSessionsHistory, updateSessionExit } from './registerService';
 
@@ -74,6 +75,8 @@ const AIIcon = () => (
   </svg>
 );
 
+const normalizeEmail = (value = '') => value.trim().toLowerCase();
+
 // ── NavItem 
 
 const NavItem = ({ icon, label, to }) => (
@@ -122,11 +125,14 @@ const DashboardPage = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [codigoEstudiante, setCodigoEstudiante] = useState('');
   const [storedPhotoURL, setStoredPhotoURL] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        const currentEmail = normalizeEmail(currentUser.email);
+        setIsAdmin(Boolean(currentEmail && ADMIN_EMAILS.some((email) => normalizeEmail(email) === currentEmail)));
         const snap = await getDoc(doc(db, 'usuarios_registrados', currentUser.uid));
         if (snap.exists()) {
           const data = snap.data();
@@ -229,7 +235,7 @@ const DashboardPage = () => {
           <NavItem icon={<TournamentIcon />} label="Torneos" to="/dashboard/torneos" />
           <NavItem icon={<GruposIcon />} label="Grupos" to="/dashboard/grupos" />
           <NavItem icon={<LeaderboardIcon />} label="Rankings" to="#" />
-          <NavItem icon={<HistoryIcon />} label="Usuarios" to="/historial-usuarios" />
+          {isAdmin && <NavItem icon={<HistoryIcon />} label="Usuarios" to="/historial-usuarios" />}
           <NavItem icon={<CodeIcon />} label="Hooks Playground" to="/playground" />
         </div>
 

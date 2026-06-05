@@ -442,7 +442,7 @@ const GruposPage = () => {
           <NavItem icon={<TournamentIcon />}  label="Torneos"          to="/dashboard/torneos" />
           <NavItem icon={<GruposIcon />}      label="Grupos"           to="/dashboard/grupos" active />
           <NavItem icon={<LeaderboardIcon />} label="Rankings"         to="#" />
-          <NavItem icon={<HistoryIcon />}     label="Usuarios"         to="/historial-usuarios" />
+          {isAdmin && <NavItem icon={<HistoryIcon />}     label="Usuarios"         to="/historial-usuarios" />}
           <NavItem icon={<CodeIcon />}        label="Hooks Playground" to="/playground" />
         </div>
         <NavItem icon={<SettingsIcon />} label="Configuración" to="/reset" />
