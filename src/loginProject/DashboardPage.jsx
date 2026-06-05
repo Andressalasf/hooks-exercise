@@ -225,7 +225,7 @@ const DashboardPage = () => {
             <HomeIcon />
             Inicio
           </div>
-          <NavItem icon={<TrophyIcon />} label="Retos Diarios" to="#" />
+          <NavItem icon={<TrophyIcon />} label="Retos Diarios" to="/dashboard/retos" />
           <NavItem icon={<TournamentIcon />} label="Torneos" to="/dashboard/torneos" />
           <NavItem icon={<GruposIcon />} label="Grupos" to="/dashboard/grupos" />
           <NavItem icon={<LeaderboardIcon />} label="Rankings" to="#" />
