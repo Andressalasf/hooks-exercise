@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// ── Typewriter hook ─────────────────────────────────────────────────────────
 const useTyper = (text, speed = 90, startDelay = 800) => {
   const [displayed, setDisplayed] = useState('');
   const [done, setDone] = useState(false);
@@ -27,7 +26,6 @@ const useTyper = (text, speed = 90, startDelay = 800) => {
   return { displayed, done };
 };
 
-// ── Shared style constants ──────────────────────────────────────────────────
 const GRAD = 'linear-gradient(105deg, #0a6bff 0%, #0040d6 52%, #001f7a 100%)';
 const gradText = { background: GRAD, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' };
 const liftSm = { boxShadow: '0 1px 2px rgba(19,27,46,0.04), 0 12px 32px -16px rgba(19,27,46,0.12)' };
@@ -39,7 +37,6 @@ const btnPrimary = {
   
 };
 
-// ── Grid background ─────────────────────────────────────────────────────────
 const GridBg = () => (
   <div
     className="absolute inset-0 pointer-events-none"
@@ -53,13 +50,11 @@ const GridBg = () => (
   />
 );
 
-// ── IDE mockup ──────────────────────────────────────────────────────────────
 const IDEMockup = () => (
   <div
     className="relative rounded-2xl overflow-hidden text-left"
     style={{ background: '#0a0e1a', ...hairline}}
   >
-    {/* Title bar */}
     <div
       className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07]"
       style={{ background: '#0d1322' }}
@@ -90,14 +85,11 @@ const IDEMockup = () => (
       </div>
     </div>
 
-    {/* Code + AI card */}
     <div className="flex font-mono text-[13.5px]" style={{ minHeight: '380px' }}>
-      {/* Line numbers */}
       <div className="py-4 pr-3 pl-4 text-right text-white/20 select-none border-r border-white/[0.06] leading-[1.7]">
         {Array.from({ length: 12 }, (_, i) => <div key={i}>{i + 1}</div>)}
       </div>
 
-      {/* Code */}
       <div className="flex-1 p-4 overflow-x-auto leading-[1.7] text-white/90">
         <div><span className="text-purple-400">#include</span> <span className="text-green-300">&lt;iostream&gt;</span></div>
         <div><span className="text-purple-400">#include</span> <span className="text-green-300">&lt;vector&gt;</span></div>
@@ -160,7 +152,6 @@ const IDEMockup = () => (
         <div><span className="text-cyan-300">{'}'}</span><span className="animate-pulse text-cyan-300/70">▋</span></div>
       </div>
 
-      {/* AI assistant card */}
       <div
         className="absolute right-5 top-1/2 -translate-y-1/2 w-64 p-5 rounded-2xl border border-white/10"
         style={{ background: 'rgba(17,23,41,0.92)', backdropFilter: 'blur(12px)' }}
@@ -190,7 +181,6 @@ const IDEMockup = () => (
   </div>
 );
 
-// ── Terminal snippet (features) ─────────────────────────────────────────────
 const TerminalSnippet = ({ filename, lines }) => (
   <div className="rounded-2xl overflow-hidden" style={{ background: '#0a0e1a', ...hairline }}>
     <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/10">
@@ -209,7 +199,6 @@ const TerminalSnippet = ({ filename, lines }) => (
   </div>
 );
 
-// ── FAQ item ────────────────────────────────────────────────────────────────
 const FAQItem = ({ q, a }) => {
   const [open, setOpen] = useState(false);
   return (
@@ -241,7 +230,6 @@ const FAQItem = ({ q, a }) => {
   );
 };
 
-// ── FAQ data ────────────────────────────────────────────────────────────────
 const FAQS = [
   { q: '¿Qué es CodeComp?', a: 'Una plataforma de programación competitiva que agiliza el flujo de trabajo con herramientas de IA e integraciones sin fricción, diseñada para la UFPSO.' },
   { q: '¿CodeComp es gratis?', a: 'Sí, el acceso base es gratuito para todos los estudiantes. Módulos adicionales se activan en eventos como la feria de proyectos.' },
@@ -251,13 +239,11 @@ const FAQS = [
   { q: '¿Es multi-lenguaje?', a: 'El módulo de problemas soporta múltiples lenguajes de programación competitiva, incluyendo C++, Python y Java.' },
 ];
 
-// ── HomePage ────────────────────────────────────────────────────────────────
 const HomePage = () => {
   const { displayed, done } = useTyper('Potenciada por IA', 120, 800);
   return (
   <div className="bg-[#f8fafc] text-slate-900 overflow-x-hidden selection:bg-blue-200 antialiased">
 
-    {/* ── NAV ── */}
     <nav
       className="fixed top-0 w-full z-50 backdrop-blur-xl border-b"
       style={{ background: '#f8fafc', borderColor: 'rgba(19,27,46,0.06)' }}
@@ -292,13 +278,11 @@ const HomePage = () => {
       </div>
     </nav>
 
-    {/* ── HERO 01 : EDITORIAL CENTERED ── */}
     <section className="relative pt-[150px] pb-28 overflow-hidden">
       <GridBg />
 
       <div className="relative max-w-7xl mx-auto px-5 md:px-20 text-center">
 
-        {/* Badge */}
         <div
           className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white mb-9"
           style={{ ...hairline }}
@@ -312,7 +296,6 @@ const HomePage = () => {
           </span>
         </div>
 
-        {/* Headline */}
         <h1
           className="font-['Sans Serif'] font-extrabold text-slate-900 max-w-5xl mx-auto mb-7 leading-[1.04] tracking-[-0.035em]"
           style={{ fontSize: 'clamp(40px,7vw,82px)' }}
@@ -327,13 +310,11 @@ const HomePage = () => {
           </span>
         </h1>
 
-        {/* Subtitle */}
         <p className="font-['Inter'] text-[18px] leading-relaxed text-slate-500 max-w-2xl mx-auto mb-10">
           Eficiencia y precisión sin igual gracias a herramientas inteligentes diseñadas para acelerar tu flujo,
           potenciar la creatividad y redefinir tu codigo.
         </p>
 
-        {/* CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-16">
           <Link
             to="/login"
@@ -357,14 +338,12 @@ const HomePage = () => {
           </Link>
         </div>
 
-        {/* IDE Mockup */}
         <div className="relative max-w-5xl mx-auto">
           <IDEMockup />
         </div>
       </div>
     </section>
 
-    {/* ── STATS / TRUST BAND ── */}
     <section className="relative py-24 overflow-hidden">
       <div className="max-w-7xl mx-auto px-5 md:px-20">
         <div className="flex items-center gap-4 mb-10">
@@ -372,7 +351,6 @@ const HomePage = () => {
           <span className="flex-1 h-px bg-slate-900/10" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Accuracy */}
           <div
             className="md:col-span-2 bg-white rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition-shadow duration-300"
             style={{ ...hairline }}
@@ -391,7 +369,6 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Community */}
           <div className="bg-white rounded-3xl p-8 hover:shadow-lg transition-shadow duration-300" style={{ ...hairline}}>
             <div className="grid place-items-center w-12 h-12 rounded-xl bg-white mb-6" style={hairline}>
               <svg className="w-6 h-6 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -403,7 +380,6 @@ const HomePage = () => {
             <p className="text-slate-500 text-sm font-['Inter']">Un espacio para estudiantes de programación competitiva.</p>
           </div>
 
-          {/* Latency */}
           <div className="bg-white rounded-3xl p-8 hover:shadow-lg transition-shadow duration-300" style={{ ...hairline,  }}>
             <div className="grid place-items-center w-12 h-12 rounded-xl bg-white mb-6" style={hairline}>
               <svg className="w-6 h-6 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -415,7 +391,6 @@ const HomePage = () => {
             <p className="text-slate-500 text-sm font-['Inter']">Asistencia en tiempo real que sigue el ritmo de tu escritura.</p>
           </div>
 
-          {/* Languages */}
           <div className="md:col-span-4 bg-white rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-8" style={{ ...hairline }}>
             <div className="max-w-md">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full mb-4">
@@ -443,7 +418,6 @@ const HomePage = () => {
       </div>
     </section>
 
-    {/* ── FEATURES ── */}
     <section className="py-40">
       <div className="max-w-7xl mx-auto px-5 md:px-20">
         <div className="flex items-center gap-4 mb-12">
@@ -458,11 +432,10 @@ const HomePage = () => {
             Herramientas <span style={gradText}>pensadas para ganar</span>
           </h2>
           <p className="font-['Inter'] text-[18px] leading-relaxed text-slate-500 max-w-md">
-            Diseña y lanza algoritmos profesionales en pocos clics. Un flujo de trabajo hecho para la creatividad y la eficiencia.
+            Diseña y lanza algoritmos en pocos clics. Un flujo de trabajo hecho para la creatividad y la eficiencia.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1 */}
           <div className="group p-8 rounded-3xl bg-white hover:shadow-lg transition-all duration-300 flex flex-col" style={hairline}>
             <div className="grid place-items-center w-14 h-14 rounded-2xl mb-7 bg-white" style={hairline}>
               <svg className="w-7 h-7 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -478,26 +451,24 @@ const HomePage = () => {
             ]} />
           </div>
 
-          {/* Card 2 */}
           <div className="group p-8 rounded-3xl bg-white hover:shadow-lg transition-all duration-300 flex flex-col" style={hairline}>
             <div className="grid place-items-center w-14 h-14 rounded-2xl mb-7 bg-white" style={hairline}>
-              <svg className="w-7 h-7 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-7 h-7 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 3.75H6.912a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859M12 3v8.25m0 0l-3-3m3 3l3-3" />
               </svg>
             </div>
             <h3 className="font-['Space_Grotesk'] text-[22px] font-semibold text-slate-900 mb-3">Integración en Torneos</h3>
             <p className="text-slate-500 mb-6 flex-1 font-['Inter']">Participa en torneos de programación y mejora tu rendimiento con herramientas que te permiten competir al máximo nivel.</p>
-            <TerminalSnippet filename="git" lines={[
-              <><span className="text-cyan-300">$</span> <span className="text-white/80"> git branch</span> <span className="text-white/60">feature/ai-optimize</span></>,
-              <><span className="text-cyan-300">$</span> <span className="text-white/80"> git commit</span> <span className="text-white/60">-m</span> <span className="text-green-300"> "Auto-optimized"</span></>,
-              <><span className="text-green-400">✓</span> <span className="text-white/60"> 2 archivos, +48 −12</span></>,
+            <TerminalSnippet filename="ejercicio.sh" lines={[
+              <><span className="text-cyan-300">$</span> <span className="text-white/80"> Se ha analizado el ejercicio</span> </>,
+              <><span className="text-cyan-300">$</span> <span className="text-white/80">optimización</span> <span className="text-white/60">-m</span> <span className="text-green-300"> "Auto-optimized"</span></>,
+              <><span className="text-green-400">✓</span> <span className="text-white/60"> 1 archivos, +48 −12</span></>,
             ]} />
           </div>
 
-          {/* Card 3 */}
           <div className="group p-8 rounded-3xl bg-white hover:shadow-lg transition-all duration-300 flex flex-col" style={hairline}>
             <div className="grid place-items-center w-14 h-14 rounded-2xl mb-7 bg-white" style={hairline}>
-              <svg className="w-7 h-7 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-7 h-7 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
               </svg>
             </div>
@@ -515,7 +486,6 @@ const HomePage = () => {
       </div>
     </section>
 
-    {/* ── FAQ ── */}
     <section className="py-40 border-y" style={{ background: '#f8fafc', borderColor: 'rgba(19,27,46,0.06)' }}>
       <div className="max-w-3xl mx-auto px-5 md:px-20">
         <div className="text-center mb-14">
@@ -535,14 +505,12 @@ const HomePage = () => {
       </div>
     </section>
 
-    {/* ── FOOTER ── */}
     <footer
       className="text-slate-900 w-full pt-24 pb-10 relative overflow-hidden border-t"
       style={{ background: '#f8fafc', borderColor: 'rgba(19,27,46,0.06)' }}
     >
       <div className="relative max-w-7xl mx-auto px-5 md:px-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
-          {/* Brand */}
           <div className="lg:col-span-4">
             <Link to="/" className="flex items-center gap-2.5 mb-6">
               
@@ -571,7 +539,6 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Links */}
           {[
             { title: 'Producto', links: ['Características', 'Seguridad', 'Beta', 'Novedades'] },
             { title: 'Recursos', links: ['Documentación', 'API Reference', 'Comunidad', 'Tutoriales'] },
@@ -590,7 +557,6 @@ const HomePage = () => {
           ))}
         </div>
 
-        {/* Bottom bar */}
         <div
           className="pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4"
           style={{ borderColor: 'rgba(19,27,46,0.10)' }}
