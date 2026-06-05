@@ -928,7 +928,7 @@ const TournamentsPage = () => {
           <NavItem icon={<TournamentIcon />} label="Torneos" to="/dashboard/torneos" active />
           <NavItem icon={<GruposIcon />} label="Grupos" to="/dashboard/grupos" />
           <NavItem icon={<LeaderboardIcon />} label="Rankings" to="#" />
-          <NavItem icon={<HistoryIcon />} label="Usuarios" to="/historial-usuarios" />
+          {isAdmin && <NavItem icon={<HistoryIcon />} label="Usuarios" to="/historial-usuarios" />}
           <NavItem icon={<CodeIcon />} label="Hooks Playground" to="/playground" />
         </div>
 
