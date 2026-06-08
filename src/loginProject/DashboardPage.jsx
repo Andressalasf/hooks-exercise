@@ -199,6 +199,7 @@ const DashboardPage = () => {
               <span className="font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Estudiante{codigoEstudiante ? ` / ${codigoEstudiante}` : ''}
               </span>
+              <span className="font-['Inter'] text-[10px] text-slate-400">{user?.email}</span>
             </div>
           </div>
           <button
@@ -276,6 +277,7 @@ const DashboardPage = () => {
                 <p className="mt-1 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-blue-700">
                   Estudiante
                 </p>
+                <p className="mt-1 font-['Inter'] text-xs text-slate-400">{user?.email}</p>
               </div>
 
               <div className="flex w-full justify-center gap-8 border-t border-slate-200 pt-4">

@@ -28,8 +28,8 @@ export const registerUserInFirestore = async (formData) => {
       throw new Error('El correo electronico no tiene un formato valido.');
     }
 
-    if (error?.code === 'auth/weak-password') {
-      throw new Error('La contrasena es muy debil. Usa al menos 6 caracteres.');
+    if (error?.code === 'auth/weak-password' || error?.code === 'auth/password-does-not-meet-requirements') {
+      throw new Error('La contraseña no cumple los requisitos: mínimo 10 caracteres, mayúscula, minúscula, número y carácter especial.');
     }
 
     throw new Error('No se pudo crear la cuenta.');

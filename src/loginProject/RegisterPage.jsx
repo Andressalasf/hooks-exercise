@@ -19,7 +19,6 @@ const RegisterPage = () => {
   const validateForm = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-    const specialCharacterRegex = /[^A-Za-z0-9]/;
 
     if (!formData.nombre.trim()) {
       newErrors.nombre = 'El nombre es obligatorio.';
@@ -48,11 +47,17 @@ const RegisterPage = () => {
     }
 
     if (!formData.password) {
-      newErrors.password = 'La contrasena es obligatoria.';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'La contrasena debe tener minimo 6 caracteres.';
-    } else if (!specialCharacterRegex.test(formData.password)) {
-      newErrors.password = 'La contrasena debe incluir al menos un caracter especial.';
+      newErrors.password = 'La contraseña es obligatoria.';
+    } else {
+      const missing = [];
+      if (formData.password.length < 10)              missing.push('mínimo 10 caracteres');
+      if (!/[A-Z]/.test(formData.password))           missing.push('una letra mayúscula');
+      if (!/[a-z]/.test(formData.password))           missing.push('una letra minúscula');
+      if (!/[0-9]/.test(formData.password))           missing.push('un número');
+      if (!/[^A-Za-z0-9]/.test(formData.password))   missing.push('un carácter especial');
+      if (missing.length > 0) {
+        newErrors.password = `La contraseña debe tener: ${missing.join(', ')}.`;
+      }
     }
 
     if (!formData.confirmPassword) {
