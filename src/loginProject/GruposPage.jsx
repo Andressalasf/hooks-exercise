@@ -471,12 +471,14 @@ const GruposPage = () => {
                   className="w-56 rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-4 font-['Inter'] text-sm text-slate-700 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
-              <button
-                onClick={openCreate}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 px-5 py-2.5 font-['Space_Grotesk'] text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:brightness-110"
-              >
-                <PlusIcon />Nuevo grupo
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={openCreate}
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 px-5 py-2.5 font-['Space_Grotesk'] text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:brightness-110"
+                >
+                  <PlusIcon />Nuevo grupo
+                </button>
+              )}
             </div>
           </div>
 
@@ -496,7 +498,7 @@ const GruposPage = () => {
               <p className="mt-1 font-['Inter'] text-sm text-slate-400">
                 {searchFilter ? 'Prueba con otro término de búsqueda.' : 'Crea el primer grupo para empezar.'}
               </p>
-              {!searchFilter && (
+              {!searchFilter && isAdmin && (
                 <button
                   onClick={openCreate}
                   className="mt-6 flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 px-5 py-2.5 font-['Space_Grotesk'] text-sm font-bold text-white transition hover:brightness-110"
@@ -545,18 +547,24 @@ const GruposPage = () => {
 
                   {/* Card footer */}
                   <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-3">
-                    <button
-                      onClick={() => openEdit(grupo)}
-                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-['Space_Grotesk'] text-xs font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      <EditIcon />Editar
-                    </button>
-                    <button
-                      onClick={() => setDeleteModal({ open: true, grupo, deleting: false })}
-                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-['Space_Grotesk'] text-xs font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-                    >
-                      <DeleteIcon />Eliminar
-                    </button>
+                    {isAdmin ? (
+                      <>
+                        <button
+                          onClick={() => openEdit(grupo)}
+                          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-['Space_Grotesk'] text-xs font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                        >
+                          <EditIcon />Editar
+                        </button>
+                        <button
+                          onClick={() => setDeleteModal({ open: true, grupo, deleting: false })}
+                          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-['Space_Grotesk'] text-xs font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                        >
+                          <DeleteIcon />Eliminar
+                        </button>
+                      </>
+                    ) : (
+                      <span className="rounded-full bg-slate-50 px-3 py-1.5 font-['Space_Grotesk'] text-xs font-semibold text-slate-400">Solo lectura</span>
+                    )}
                   </div>
                 </div>
               ))}

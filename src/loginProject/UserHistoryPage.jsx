@@ -506,7 +506,7 @@ const UserHistoryPage = () => {
           <NavItem icon={<LeaderboardIcon />} label="Rankings" to="#" />
           <div className="flex items-center gap-3 rounded-lg border-r-4 border-blue-600 bg-blue-50 px-4 py-3 font-['Space_Grotesk'] text-sm font-bold text-blue-700">
             <HistoryIcon />
-            Historial
+            Usuarios
           </div>
           <NavItem icon={<CodeIcon />} label="Hooks Playground" to="/playground" />
         </div>
