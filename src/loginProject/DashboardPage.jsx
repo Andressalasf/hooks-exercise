@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
+import { ADMIN_EMAILS } from '../config';
 import { auth, db } from '../firebase/firebaseConfig';
 import { getSessionsHistory, updateSessionExit } from './registerService';
 
@@ -16,6 +17,18 @@ const HomeIcon = () => (
 const TrophyIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M16 4H8m8 0a4 4 0 010 8H8a4 4 0 010-8m8 0v1m-8-1v1m-2 7H6a2 2 0 000 4h2m8 0h2a2 2 0 000-4h-2m-8 4v3m8-3v3M9 21h6" />
+  </svg>
+);
+
+const TournamentIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M7 4h10v3a5 5 0 01-3 4.58V13a2 2 0 002 2h1a3 3 0 013 3v2H4v-2a3 3 0 013-3h1a2 2 0 002-2v-1.42A5 5 0 017 7V4zM9 4v2a3 3 0 006 0V4" />
+  </svg>
+);
+
+const GruposIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
   </svg>
 );
 
@@ -61,6 +74,8 @@ const AIIcon = () => (
     <path d="M12 2l1.09 3.26L16 5l-2.91.74L12 9l-1.09-3.26L8 5l2.91-.74L12 2zm6 6l.73 2.18L21 11l-2.27.82L18 14l-.73-2.18L15 11l2.27-.82L18 8zM6 8l.73 2.18L9 11l-2.27.82L6 14l-.73-2.18L3 11l2.27-.82L6 8zm6 6l1.09 3.26L16 18l-2.91.74L12 22l-1.09-3.26L8 18l2.91-.74L12 14z" />
   </svg>
 );
+
+const normalizeEmail = (value = '') => value.trim().toLowerCase();
 
 // ── NavItem 
 
@@ -110,11 +125,14 @@ const DashboardPage = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [codigoEstudiante, setCodigoEstudiante] = useState('');
   const [storedPhotoURL, setStoredPhotoURL] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        const currentEmail = normalizeEmail(currentUser.email);
+        setIsAdmin(Boolean(currentEmail && ADMIN_EMAILS.some((email) => normalizeEmail(email) === currentEmail)));
         const snap = await getDoc(doc(db, 'usuarios_registrados', currentUser.uid));
         if (snap.exists()) {
           const data = snap.data();
@@ -181,6 +199,7 @@ const DashboardPage = () => {
               <span className="font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Estudiante{codigoEstudiante ? ` / ${codigoEstudiante}` : ''}
               </span>
+              <span className="font-['Inter'] text-[10px] text-slate-400">{user?.email}</span>
             </div>
           </div>
           <button
@@ -213,9 +232,11 @@ const DashboardPage = () => {
             <HomeIcon />
             Inicio
           </div>
-          <NavItem icon={<TrophyIcon />} label="Retos Diarios" to="#" />
+          <NavItem icon={<TrophyIcon />} label="Retos Diarios" to="/dashboard/retos" />
+          <NavItem icon={<TournamentIcon />} label="Torneos" to="/dashboard/torneos" />
+          <NavItem icon={<GruposIcon />} label="Grupos" to="/dashboard/grupos" />
           <NavItem icon={<LeaderboardIcon />} label="Rankings" to="#" />
-          <NavItem icon={<HistoryIcon />} label="Usuarios" to="/historial-usuarios" />
+          {isAdmin && <NavItem icon={<HistoryIcon />} label="Usuarios" to="/historial-usuarios" />}
           <NavItem icon={<CodeIcon />} label="Hooks Playground" to="/playground" />
         </div>
 
@@ -256,6 +277,7 @@ const DashboardPage = () => {
                 <p className="mt-1 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wider text-blue-700">
                   Estudiante
                 </p>
+                <p className="mt-1 font-['Inter'] text-xs text-slate-400">{user?.email}</p>
               </div>
 
               <div className="flex w-full justify-center gap-8 border-t border-slate-200 pt-4">

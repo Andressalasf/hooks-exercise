@@ -1,7 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { ADMIN_EMAILS } from '../config';
 import { auth, db } from '../firebase/firebaseConfig';
 import { getSessionsHistory, updateSessionExit } from './registerService';
 
@@ -14,6 +17,18 @@ const HomeIcon = () => (
 const TrophyIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M16 4H8m8 0a4 4 0 010 8H8a4 4 0 010-8m8 0v1m-8-1v1m-2 7H6a2 2 0 000 4h2m8 0h2a2 2 0 000-4h-2m-8 4v3m8-3v3M9 21h6" />
+  </svg>
+);
+
+const TournamentIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M7 4h10v3a5 5 0 01-3 4.58V13a2 2 0 002 2h1a3 3 0 013 3v2H4v-2a3 3 0 013-3h1a2 2 0 002-2v-1.42A5 5 0 017 7V4zM9 4v2a3 3 0 006 0V4" />
+  </svg>
+);
+
+const GruposIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
   </svg>
 );
 
@@ -119,21 +134,19 @@ const Avatar = ({ user, size = 'md' }) => {
   );
 };
 
-const methodStyles = {
-  facebook: 'border-blue-100 bg-blue-50 text-blue-700',
-  github: 'border-blue-100 bg-blue-50 text-blue-600',
-  google: 'border-blue-100 bg-blue-50 text-blue-500',
-  password: 'border-blue-100 bg-blue-50 text-blue-800',
-};
-
 const statusStyles = {
   activo: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   finalizado: 'border-rose-200 bg-rose-50 text-rose-700',
 };
 
+const normalizeEmail = (value = '') => value.trim().toLowerCase();
+
 const UserHistoryPage = () => {
+  const location = useLocation();
+  const routeState = location.state || {};
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(routeState.currentUser ?? null);
+  const [isAdmin, setIsAdmin] = useState(Boolean(routeState.isAdmin));
   const [codigoEstudiante, setCodigoEstudiante] = useState('');
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [sessions, setSessions] = useState([]);
@@ -145,9 +158,25 @@ const UserHistoryPage = () => {
   const itemsPerPage = 5;
 
   useEffect(() => {
+    if (routeState.currentUser && routeState.isAdmin) {
+      setUser(routeState.currentUser);
+      setIsAdmin(true);
+      setLoading(false);
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        const currentEmail = normalizeEmail(currentUser.email);
+        const authorized = Boolean(currentEmail && ADMIN_EMAILS.some((email) => normalizeEmail(email) === currentEmail));
+        setIsAdmin(authorized);
+
+        if (!authorized) {
+          setSessions([]);
+          setLoading(false);
+          return;
+        }
+
         const snap = await getDoc(doc(db, 'usuarios_registrados', currentUser.uid));
         if (snap.exists()) setCodigoEstudiante(snap.data().codigo ?? '');
         
@@ -166,7 +195,7 @@ const UserHistoryPage = () => {
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, routeState.currentUser, routeState.isAdmin]);
 
   const displayName = user?.displayName || user?.email?.split('@')[0] || 'Usuario';
 
@@ -198,15 +227,51 @@ const UserHistoryPage = () => {
     return result;
   }, [sessions, searchQuery, statusFilter, methodFilter]);
 
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
+  const handleStatusFilterChange = (value) => {
+    setStatusFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleMethodFilterChange = (value) => {
+    setMethodFilter(value);
+    setCurrentPage(1);
+  };
+
   // Paginación
   const totalPages = Math.ceil(filteredSessions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedSessions = filteredSessions.slice(startIndex, startIndex + itemsPerPage);
+  const visiblePageNumbers = useMemo(() => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
 
-  // Resetear a página 1 cuando cambian filtros
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+
+    if (endPage - startPage < 4) {
+      startPage = Math.max(1, endPage - 4);
+    }
+
+    return Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index);
+  }, [currentPage, totalPages]);
+
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, statusFilter, methodFilter]);
+    if (!loading && !isAdmin && user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [loading, isAdmin, navigate, user]);
+
+  if (loading) {
+    return null;
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   const handleLogout = async () => {
     try {
@@ -221,12 +286,6 @@ const UserHistoryPage = () => {
     
     await signOut(auth);
     navigate('/login');
-  };
-
-  const formatTime = (timestamp) => {
-    if (!timestamp) return 'En curso';
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   };
 
   const formatDateTime = (timestamp) => {
@@ -248,6 +307,145 @@ const UserHistoryPage = () => {
     if (hours > 0) return `${hours}h ${minutes}m`;
     if (minutes > 0) return `${minutes}m ${seconds}s`;
     return `${seconds}s`;
+  };
+
+  const handleDownloadReport = () => {
+    if (!filteredSessions.length) return;
+
+    const doc = new jsPDF('l', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const reportDate = new Date();
+    const fileDate = reportDate.toISOString().slice(0, 10);
+
+    const statusLabel = statusFilter
+      ? statusFilter === 'activo'
+        ? 'Activos'
+        : 'Finalizados'
+      : 'Todos';
+    const methodLabel = methodFilter
+      ? methodFilter === 'password'
+        ? 'Email / Password'
+        : methodFilter.charAt(0).toUpperCase() + methodFilter.slice(1)
+      : 'Todos';
+    const activeCount = filteredSessions.filter((session) => session.status === 'activo').length;
+    const finishedCount = filteredSessions.filter((session) => session.status === 'finalizado').length;
+    const methodsCount = new Set(filteredSessions.map((session) => session.method || 'N/D')).size;
+
+    doc.setFillColor(37, 99, 235);
+    doc.rect(0, 0, pageWidth, 32, 'F');
+    doc.setFillColor(30, 64, 175);
+    doc.rect(0, 0, pageWidth, 8, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('CODECOMP', 14, 17);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Reporte de historial de usuarios', 14, 25);
+    doc.setFontSize(9);
+    doc.text(`Generado: ${formatDateTime(reportDate.getTime())}`, pageWidth - 14, 17, { align: 'right' });
+    doc.text(`Filtros aplicados: ${statusLabel} / ${methodLabel}`, pageWidth - 14, 25, { align: 'right' });
+
+    doc.setTextColor(30, 41, 59);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text('Resumen del reporte', 14, 44);
+
+    const cards = [
+      { label: 'Registros', value: String(filteredSessions.length), x: 14, fill: [239, 246, 255], accent: [59, 130, 246] },
+      { label: 'Activos', value: String(activeCount), x: 70, fill: [240, 253, 244], accent: [16, 185, 129] },
+      { label: 'Finalizados', value: String(finishedCount), x: 126, fill: [255, 241, 242], accent: [244, 63, 94] },
+      { label: 'Métodos', value: String(methodsCount), x: 182, fill: [240, 249, 255], accent: [14, 165, 233] },
+    ];
+
+    cards.forEach((card) => {
+      doc.setFillColor(...card.fill);
+      doc.setDrawColor(...card.accent);
+      doc.roundedRect(card.x, 50, 48, 18, 3, 3, 'FD');
+      doc.setTextColor(30, 41, 59);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text(card.value, card.x + 5, 60);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text(card.label, card.x + 5, 66);
+    });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Estado: ${statusLabel}`, 14, 77);
+    doc.text(`Método: ${methodLabel}`, 14, 83);
+    doc.text(`Búsqueda: ${searchQuery.trim() || 'Sin filtro'}`, 14, 89);
+
+    const tableBody = filteredSessions.map((session, index) => [
+      String(index + 1),
+      `${session.nombre || ''} ${session.apellido || ''}`.trim() || 'Sin nombre',
+      session.email || 'Sin correo',
+      session.codigo || 'Sin código',
+      session.method === 'password' ? 'Email / Password' : (session.method || 'N/D'),
+      session.status || 'N/D',
+      formatDateTime(session.entryTime),
+      formatDateTime(session.exitTime),
+      session.status === 'activo' ? 'En curso' : formatDuration(session.duration),
+    ]);
+
+    autoTable(doc, {
+      startY: 96,
+      head: [[
+        '#',
+        'Usuario',
+        'Correo',
+        'Código',
+        'Método',
+        'Estado',
+        'Entrada',
+        'Salida',
+        'Duración',
+      ]],
+      body: tableBody,
+      theme: 'grid',
+      styles: {
+        font: 'helvetica',
+        fontSize: 7,
+        cellPadding: 1.8,
+        textColor: [15, 23, 42],
+        lineColor: [219, 234, 254],
+        lineWidth: 0.2,
+      },
+      headStyles: {
+        fillColor: [59, 130, 246],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+      columnStyles: {
+        0: { cellWidth: 8 },
+        1: { cellWidth: 36 },
+        2: { cellWidth: 46 },
+        3: { cellWidth: 24 },
+        4: { cellWidth: 28 },
+        5: { cellWidth: 22 },
+        6: { cellWidth: 36 },
+        7: { cellWidth: 36 },
+        8: { cellWidth: 24 },
+      },
+      margin: { left: 12, right: 12 },
+      tableWidth: 'auto',
+      didDrawPage: () => {
+        doc.setDrawColor(219, 234, 254);
+        doc.setLineWidth(0.3);
+        doc.line(12, pageHeight - 14, pageWidth - 12, pageHeight - 14);
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Página ${doc.internal.getNumberOfPages()}`, 14, pageHeight - 8);
+        doc.text('Reporte generado desde CODECOMP', pageWidth - 14, pageHeight - 8, { align: 'right' });
+      },
+    });
+
+    doc.save(`historial-usuarios-${fileDate}.pdf`);
   };
 
   return (
@@ -302,11 +500,13 @@ const UserHistoryPage = () => {
 
         <div className="flex flex-1 flex-col gap-1">
           <NavItem icon={<HomeIcon />} label="Inicio" to="/dashboard" />
-          <NavItem icon={<TrophyIcon />} label="Retos Diarios" to="#" />
+          <NavItem icon={<TrophyIcon />} label="Retos Diarios" to="/dashboard/retos" />
+          <NavItem icon={<TournamentIcon />} label="Torneos" to="/dashboard/torneos" />
+          <NavItem icon={<GruposIcon />} label="Grupos" to="/dashboard/grupos" />
           <NavItem icon={<LeaderboardIcon />} label="Rankings" to="#" />
           <div className="flex items-center gap-3 rounded-lg border-r-4 border-blue-600 bg-blue-50 px-4 py-3 font-['Space_Grotesk'] text-sm font-bold text-blue-700">
             <HistoryIcon />
-            Historial
+            Usuarios
           </div>
           <NavItem icon={<CodeIcon />} label="Hooks Playground" to="/playground" />
         </div>
@@ -339,7 +539,7 @@ const UserHistoryPage = () => {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   placeholder="Buscar por nombre, apellidos, código o correo"
                   className="w-full rounded-2xl border border-blue-100 bg-white py-3.5 pl-11 pr-4 font-['Inter'] text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.08)]"
                 />
@@ -354,6 +554,14 @@ const UserHistoryPage = () => {
                   <FilterIcon />
                   Filtros
                 </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadReport}
+                  disabled={!filteredSessions.length}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-blue-600 bg-blue-600 px-4 py-3 font-['Space_Grotesk'] text-sm font-semibold text-white transition hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
+                >
+                  Descargar PDF
+                </button>
               </div>
             </div>
 
@@ -362,7 +570,7 @@ const UserHistoryPage = () => {
                 <p className="mb-3 font-['Space_Grotesk'] text-xs font-bold uppercase tracking-wide text-blue-700">Estado</p>
                 <div className="mb-4 flex flex-wrap items-center gap-2">
                   <button
-                    onClick={() => setStatusFilter(null)}
+                    onClick={() => handleStatusFilterChange(null)}
                     className={`rounded-full border px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold transition ${
                       statusFilter === null
                         ? 'border-blue-200 bg-blue-50 text-blue-700'
@@ -372,7 +580,7 @@ const UserHistoryPage = () => {
                     Todos
                   </button>
                   <button
-                    onClick={() => setStatusFilter('activo')}
+                    onClick={() => handleStatusFilterChange('activo')}
                     className={`rounded-full border px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold transition ${
                       statusFilter === 'activo'
                         ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
@@ -382,7 +590,7 @@ const UserHistoryPage = () => {
                     Activos
                   </button>
                   <button
-                    onClick={() => setStatusFilter('finalizado')}
+                    onClick={() => handleStatusFilterChange('finalizado')}
                     className={`rounded-full border px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold transition ${
                       statusFilter === 'finalizado'
                         ? 'border-rose-200 bg-rose-50 text-rose-700'
@@ -408,7 +616,7 @@ const UserHistoryPage = () => {
                   {['facebook', 'github', 'google', 'password'].map((method) => (
                     <button
                       key={method}
-                      onClick={() => setMethodFilter(method)}
+                      onClick={() => handleMethodFilterChange(method)}
                       className={`rounded-full border px-3.5 py-2 font-['Space_Grotesk'] text-xs font-semibold transition ${
                         methodFilter === method
                           ? 'border-blue-200 bg-blue-50 text-blue-700'
@@ -518,8 +726,7 @@ const UserHistoryPage = () => {
                 Anterior
               </button>
 
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                const pageNum = i + 1;
+              {visiblePageNumbers.map((pageNum) => {
                 return (
                   <button
                     key={pageNum}
@@ -535,7 +742,11 @@ const UserHistoryPage = () => {
                 );
               })}
 
-              {totalPages > 5 && <span className="flex h-11 items-center justify-center px-1 text-blue-300"><EllipsisIcon /></span>}
+              {totalPages > 5 && visiblePageNumbers[visiblePageNumbers.length - 1] < totalPages && (
+                <span className="flex h-11 items-center justify-center px-1 text-blue-300">
+                  <EllipsisIcon />
+                </span>
+              )}
 
               <button
                 onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
